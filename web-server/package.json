@@ -1,0 +1,16 @@
+{
+  "name": "rustcwb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-css": "tailwindcss build -i styles/styles.css -o public/assets/css/styles.css",
+    "watch-css": "tailwindcss -w -i styles/styles.css -o public/assets/css/styles.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "tailwindcss": "^3.4.3"
+  }
+}

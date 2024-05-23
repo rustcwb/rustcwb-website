@@ -1,0 +1,21 @@
+[package]
+name = "web-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.7" }
+axum-htmx = "0.5"
+minijinja = { version = "1" }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.5", features = [
+    "fs",
+    "trace",
+    "compression-br",
+    "compression-deflate",
+    "compression-gzip",
+] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"

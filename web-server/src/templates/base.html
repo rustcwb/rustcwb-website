@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <title>{% block title %}RustCWB{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
+    <link rel="icon" href="/assets/favicon.ico" />
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+
+<body class="min-h-screen bg-zinc-50 text-xl">
+<header>
+    <nav class="bg-zinc-500 text-white">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <a href="/" class="font-bold">RustCWB</a>
+            <ul class="flex space-x-4">
+                <li><a href="/meet_ups">Meet Ups</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+{% block content %}{% endblock %}
+</body>
+
+</html>
