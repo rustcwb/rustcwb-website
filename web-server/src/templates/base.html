@@ -11,7 +11,7 @@
 
 <body class="min-h-screen bg-zinc-50 text-xl">
 <header>
-    <nav class="bg-zinc-500 text-white">
+    <nav class="bg-black text-white">
         <div class="container mx-auto flex justify-between items-center p-4">
             <a href="/" class="font-bold">RustCWB</a>
             <ul class="flex space-x-4">
@@ -21,7 +21,14 @@
         </div>
     </nav>
 </header>
-{% block content %}{% endblock %}
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+<footer class="bg-black text-white">
+    <div class="container mx-auto p-4">
+        <p class="text-center">RustCWB - 2024</p>
+    </div>
+</footer>
 </body>
 
 </html>
