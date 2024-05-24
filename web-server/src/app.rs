@@ -1,13 +1,13 @@
 use anyhow::Result;
+use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
+use axum::{extract::State, response::Html};
+use minijinja::context;
 use minijinja::Environment;
 use std::path::Path;
 use std::sync::Arc;
 use tower_http::services::ServeDir;
-use axum::{extract::State, response::Html};
-use axum::response::IntoResponse;
-use minijinja::context;
 
 pub fn build_app<T: Clone + Send + Sync + 'static>(
     assets_dir: impl AsRef<Path>,
@@ -35,7 +35,7 @@ pub struct HtmlError;
 impl IntoResponse for HtmlError {
     fn into_response(self) -> axum::http::Response<axum::body::Body> {
         let html = r#"
-        <div class="container mx-auto p-4">
+        <div class="font-jetBrains container mx-auto p-4">
             <h1 class="text-4xl font-bold">Dont PANIC!!</h1>
             <p class="text-xl">An error occurred while processing your request.</p>
         </div>
@@ -43,7 +43,6 @@ impl IntoResponse for HtmlError {
         Html(html).into_response()
     }
 }
-
 
 pub struct AppState {
     minijinja_enviroment: Environment<'static>,
