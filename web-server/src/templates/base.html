@@ -5,9 +5,11 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
-        <link rel="icon" href="/assets/favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="icon" sizes="16x16" type="image/png" href="/assets/favicon-16x16.png">
+        <link rel="icon" sizes="32x32" type="image/png" href="/assets/favicon-32x32.png">
+        <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
         <link
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
             rel="stylesheet"
@@ -30,11 +32,9 @@
                 </div>
             </nav>
         </header>
-        <main class="flex flex-col">{% block content %}{% endblock %}</main>
+        <main class="flex flex-col mb-auto">{% block content %}{% endblock %}</main>
         <footer class="bg-black text-white">
-            <div class="mx-auto p-4">
-                <p class="text-center">RustCWB - 2024</p>
-            </div>
+            <p class="text-center text-lg p-4">RustCWB - 2024</p>
         </footer>
     </body>
 </html>

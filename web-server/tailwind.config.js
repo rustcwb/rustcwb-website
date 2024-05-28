@@ -4,7 +4,11 @@ module.exports = {
     files: ["./src/templates/**/*.html", "./src/**/*.rs"],
   },
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'rust': '#B7410E'
+      }
+    },
     fontFamily: {
       jetBrains: ["JetBrains Mono", "sans-serif"],
     },
