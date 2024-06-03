@@ -1,37 +1,96 @@
-{% extends "base" %}
-{% block content %}
+{% extends "base" %} {% block content %}
 <div class="flex flex-col items-left justify-items-start my-3 text-lg">
-  <section class="flex items-center justify-center">
-    <div class="flex items-center justify-center flex-col lg:flex-row p-4 space-x-6 md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl">
-      <div class="flex flex-col">
-        <h1 class="text-8xl font-bold">RustCWB</h1>
-        <p class="mt-2">Oxidize Curitiba</p>
-      </div>
-      <img  class="p-4 rounded-lg shadow-md" src="https://www.rust-lang.org/static/images/rustbridge-paris.jpg" alt="Foto do grupo de rust" />
-    </div>
-  </section>
-  <section class="flex px-4 py-6 bg-rust text-white justify-center items-center">
-    <div class="flex flex-col md:max-w-screen-sm lg:max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl">
-      <h2 class="text-2xl font-bold">Sobre o Grupo</h2>
-      <div class="text-md mt-6 text-justify">
-        <p class="py-2">Rust tem ganhado popularidade em diversos segmentos. Desde web development até embarcados. Sendo uma linguagem prática, que mistura elementos de alto e baixo nível empodeirando a todos a criar código rápido, eficiente e seguro.</p>
-        <p class="py-2">Apesar deste crescimento, Rust ainda é pobre em grupos de meet-up e conferências principalmente no Brazil. Por isso criamos o <strong>RustCWB</strong>.</p>
-      </div>
-    </div>
-  </section>
-  <section class="flex flex-col p-4">
-    <h2 class="text-2xl font-bold">Próximo Meetup</h2>
-    <article class="flex-col mt-3">
-      <header><h3 class="font-bold text-xl">Threads vs Green Threads vs Gorotines vs Tokio Tasks</h3></header>
-      <div>Data: <time datetime="2024-07-14">2024-07-14</time></div>
-      <p>Speaker: Bruno Clemente</p>
-      <address>Local: Auditório Lateral, Rua da Paz, 123, Curitiba, PR</address>
-      <p class="text-md py-2">Para se inscrever <a href="#" class="underline transition ease-in-out duration-150 hover:text-2xl">click aqui</a>. É gratuito.</p>
-    </article>
-  </section>
-  <section class="flex flex-col p-4">
-    <h2 class="text-2xl font-bold">Sobre Rust</h2>
-    <p class="text-md">Rust é uma linguagem de programação que ajuda você a construir software confiável e eficiente. É ótimo para sistemas de baixo nível, mas também é perfeito para web, desenvolvimento de jogos e muito mais!</p>
-  </section>
+    <section class="flex items-center justify-center">
+        <div
+            class="flex items-center justify-between flex-col lg:flex-row px-4 data-width"
+        >
+            <div class="flex flex-col">
+                <h1 class="text-7xl md:text-8xl font-bold">RustCWB</h1>
+                <p class="mt-2">Oxidize Curitiba</p>
+            </div>
+            <img
+                class="p-4 rounded-lg shadow-md"
+                src="https://www.rust-lang.org/static/images/rustbridge-paris.jpg"
+                alt="Foto do grupo de rust"
+            />
+        </div>
+    </section>
+    <section
+        class="flex px-4 py-6 bg-rust text-white justify-center items-center"
+    >
+        <div class="flex flex-col data-width">
+            <h2 class="text-2xl font-bold">Sobre o Grupo</h2>
+            <div class="text-md mt-6 text-justify">
+                <p class="py-2">
+                    Rust tem ganhado popularidade em diversos segmentos. Desde
+                    web development até embarcados. Sendo uma linguagem prática,
+                    que mistura elementos de alto e baixo nível empodeirando a
+                    todos a criar código rápido, eficiente e seguro.
+                </p>
+                <p class="py-2">
+                    Apesar deste crescimento, Rust ainda é pobre em grupos de
+                    meet-up e conferências principalmente no Brazil. Por isso
+                    criamos o <strong>RustCWB</strong>.
+                </p>
+            </div>
+        </div>
+    </section>
+    <section class="flex flex-col p-4 items-center">
+        <div class="flex flex-col data-width">
+            <h2 class="text-2xl font-bold">Próximo Meetup</h2>
+            <article class="flex-col mt-3">
+                <header>
+                    <h3 class="font-bold text-xl">
+                        Threads vs Green Threads vs Gorotines vs Tokio Tasks
+                    </h3>
+                </header>
+                <div>Data: <time datetime="2024-07-14">2024-07-14</time></div>
+                <p>Speaker: Bruno Clemente</p>
+                <address>
+                    Local: Auditório Lateral, Rua da Paz, 123, Curitiba, PR
+                </address>
+                <p class="text-md py-2">
+                    Para se inscrever
+                    <a
+                        href="#"
+                        class="underline transition ease-in-out duration-150 hover:text-rust"
+                        >click aqui</a
+                    >. É gratuito.
+                </p>
+            </article>
+        </div>
+    </section>
+    <section
+        class="flex px-4 py-6 bg-rust text-white justify-center items-center"
+    >
+        <div class="flex flex-col data-width">
+            <h2 class="text-2xl font-bold">MeetUps antigos</h2>
+            <div class="text-md mt-6 text-justify">
+                <p class="py-2">
+                    Nossos meetups são sempre gravados e disponibilizados no
+                    nosso canal do youtube. Assim você pode assistir quando
+                    quiser.
+                </p>
+                <p class="py-2">
+                    <a
+                        href="#"
+                        class="underline transition ease-in-out duration-150 hover:text-black"
+                        >Confira aqui</a
+                    >
+                </p>
+            </div>
+        </div>
+    </section>
+    <section class="flex flex-col p-4 items-center">
+        <div class="flex flex-col data-width">
+            <h2 class="text-2xl font-bold">Sobre Rust</h2>
+            <p class="text-md">
+                Rust é uma linguagem de programação que ajuda você a construir
+                software confiável e eficiente. É ótimo para sistemas de baixo
+                nível, mas também é perfeito para web, desenvolvimento de jogos
+                e muito mais!
+            </p>
+        </div>
+    </section>
 </div>
 {% endblock %}

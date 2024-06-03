@@ -3,6 +3,7 @@ use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
 use axum::{extract::State, response::Html};
+use axum_htmx::HxRequest;
 use minijinja::context;
 use minijinja::Environment;
 use std::path::Path;
@@ -18,9 +19,17 @@ pub fn build_app<T: Clone + Send + Sync + 'static>(
         .fallback_service(ServeDir::new(assets_dir.as_ref())))
 }
 
-pub async fn index(State(state): State<Arc<AppState>>) -> Result<Html<String>, HtmlError> {
+pub async fn index(
+    HxRequest(is_hx_request): HxRequest,
+    State(state): State<Arc<AppState>>,
+) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("home")?;
-    Ok(Html(tmpl.render(context! {})?))
+    match is_hx_request {
+        true => Ok(Html(
+            tmpl.eval_to_state(context! {})?.render_block("content")?,
+        )),
+        false => Ok(Html(tmpl.render(context! {})?)),
+    }
 }
 
 impl From<minijinja::Error> for HtmlError {

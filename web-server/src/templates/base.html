@@ -7,9 +7,19 @@
         <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="icon" sizes="16x16" type="image/png" href="/assets/favicon-16x16.png">
-        <link rel="icon" sizes="32x32" type="image/png" href="/assets/favicon-32x32.png">
-        <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+        <link
+            rel="icon"
+            sizes="16x16"
+            type="image/png"
+            href="/assets/favicon-16x16.png"
+        />
+        <link
+            rel="icon"
+            sizes="32x32"
+            type="image/png"
+            href="/assets/favicon-32x32.png"
+        />
+        <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
         <link
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
             rel="stylesheet"
@@ -21,7 +31,9 @@
         <header>
             <nav class="bg-black text-white text-lg">
                 <div class="flex justify-between items-center p-4">
-                    <a href="/" class=" font-bold">RustCWB 🦀</a>
+                    <a class="font-bold" hx-get="/" hx-target="#main-content"
+                        >RustCWB 🦀</a
+                    >
                     <span class="hidden md:contents"
                         >The Rust Lang Meet Up Group of Curitiba</span
                     >
@@ -32,7 +44,9 @@
                 </div>
             </nav>
         </header>
-        <main class="flex flex-col mb-auto">{% block content %}{% endblock %}</main>
+        <main class="flex flex-col mb-auto" id="main-content">
+            {% block content %}{% endblock %}
+        </main>
         <footer class="bg-black text-white">
             <p class="text-center text-lg p-4">RustCWB - 2024</p>
         </footer>
