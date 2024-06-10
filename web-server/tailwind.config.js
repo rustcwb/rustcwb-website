@@ -6,8 +6,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'rust': '#B7410E'
-      }
+        rust: "#B7410E",
+        rustLight: "#e37444",
+        rustDark: "#963409",
+      },
     },
     fontFamily: {
       jetBrains: ["JetBrains Mono", "sans-serif"],

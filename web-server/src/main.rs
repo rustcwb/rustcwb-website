@@ -1,11 +1,11 @@
 mod app;
 
+use crate::app::build_app;
 use anyhow::Result;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 use tracing::Level;
-use crate::app::build_app;
 
-#[tokio::main]
+#[::tokio::main]
 async fn main() -> Result<()> {
     let subscriber = tracing_subscriber::fmt()
         .compact()
