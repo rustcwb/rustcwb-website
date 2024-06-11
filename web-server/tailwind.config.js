@@ -15,4 +15,5 @@ module.exports = {
       jetBrains: ["JetBrains Mono", "sans-serif"],
     },
   },
+  plugins: [require("@tailwindcss/typography")],
 };

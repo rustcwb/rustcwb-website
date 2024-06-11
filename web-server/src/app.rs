@@ -31,7 +31,7 @@ pub async fn index(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("home")?;
-    let vec = vec![
+    let vec: Vec<PastMeetUpMetadata> = vec![
         PastMeetUpMetadata {
             id: Ulid::new(),
             title: "Rust Meetup".to_string(),
@@ -155,8 +155,17 @@ struct PastMeetUpMetadata {
 struct PastMeetUp {
     id: Ulid,
     title: String,
+    #[serde(serialize_with = "md_to_html")]
     description: String,
     speaker: String,
     date: NaiveDate,
     link: Url,
+}
+
+fn md_to_html<S>(md: &str, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    let html = markdown::to_html(md);
+    serializer.serialize_str(&html)
 }
