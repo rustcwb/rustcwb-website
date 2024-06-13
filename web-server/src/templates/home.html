@@ -2,21 +2,21 @@
 <div class="flex flex-col items-left justify-items-start my-3 text-lg">
     <section class="flex items-center justify-center">
         <div
-            class="flex items-center justify-between flex-col lg:flex-row px-4 data-width"
+                class="flex items-center justify-between flex-col lg:flex-row px-4 data-width"
         >
             <div class="flex flex-col">
                 <h1 class="text-7xl md:text-8xl font-bold">RustCWB</h1>
                 <p class="mt-2">Oxidize Curitiba</p>
             </div>
             <img
-                class="p-4 rounded-lg shadow-md"
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0tTFh-BpJthY2nU4VcZDFnxl5bOAacz-VLQ&s"
-                alt="Foto do grupo de rust"
+                    alt="Foto do grupo de rust"
+                    class="p-4 rounded-lg shadow-md w-full"
+                    src="/assets/openart-image_h87n6XLu_1718314953055_raw.png"
             />
         </div>
     </section>
     <section
-        class="flex px-4 py-6 bg-rust text-white justify-center items-center"
+            class="flex px-4 py-6 bg-rust text-white justify-center items-center"
     >
         <div class="flex flex-col data-width">
             <h2 class="text-2xl font-bold">Sobre o Grupo</h2>
@@ -39,12 +39,15 @@
         <div class="flex flex-col data-width">
             <h2 class="text-2xl font-bold">Próximo Meetup</h2>
             <article class="flex-col mt-3">
+                {% if future_meet_up %}
                 <header>
                     <h3 class="font-bold text-xl">
                         Threads vs Green Threads vs Gorotines vs Tokio Tasks
                     </h3>
                 </header>
-                <div>Data: <time datetime="2024-07-14">2024-07-14</time></div>
+                <div>Data:
+                    <time datetime="2024-07-14">2024-07-14</time>
+                </div>
                 <p>Speaker: Bruno Clemente</p>
                 <address>
                     Local: Auditório Lateral, Rua da Paz, 123, Curitiba, PR
@@ -52,16 +55,22 @@
                 <p class="text-md py-2">
                     Para se inscrever
                     <a
-                        href="#"
-                        class="underline transition ease-in-out duration-150 hover:text-rust"
-                        >click aqui</a
+                            class="underline transition ease-in-out duration-150 hover:text-rust"
+                            href="#"
+                    >click aqui</a
                     >. É gratuito.
                 </p>
+                {% else %}
+                <p class="text-md py-2">
+                    Ainda não temos um próximo meetup agendado. Fique ligado
+                    que avisaremos aqui quando tivermos.
+                </p>
+                {% endif %}
             </article>
         </div>
     </section>
     <section
-        class="flex px-4 py-6 bg-rust text-white justify-center items-center"
+            class="flex px-4 py-6 bg-rust text-white justify-center items-center"
     >
         <div class="flex flex-col data-width">
             <h2 class="text-2xl font-bold">MeetUps antigos</h2>
@@ -80,7 +89,7 @@
     <section class="flex flex-col p-4 items-center">
         <div class="flex flex-col data-width">
             <h2 class="text-2xl font-bold">Sobre Rust</h2>
-            <p class="text-md">
+            <p class="text-md mt-6">
                 Rust é uma linguagem de programação que ajuda você a construir
                 software confiável e eficiente. É ótimo para sistemas de baixo
                 nível, mas também é perfeito para web, desenvolvimento de jogos

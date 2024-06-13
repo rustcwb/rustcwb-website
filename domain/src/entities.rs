@@ -38,6 +38,12 @@ pub enum FutureMeetUpState {
     },
 }
 
+impl FutureMeetUp {
+    pub fn new(id: Ulid, state: FutureMeetUpState, date: NaiveDate) -> Self {
+        Self { id, state, date }
+    }
+}
+
 impl PastMeetUp {
     pub fn new(
         id: Ulid,

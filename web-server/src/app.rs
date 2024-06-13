@@ -1,21 +1,23 @@
+use std::path::Path;
+use std::sync::Arc;
+
 use anyhow::Result;
+use axum::{extract::State, response::Html};
 use axum::extract::Path as PathExtractor;
 use axum::response::IntoResponse;
-use axum::routing::get;
 use axum::Router;
-use axum::{extract::State, response::Html};
+use axum::routing::get;
 use axum_htmx::HxRequest;
 use chrono::NaiveDate;
-use domain::list_past_meet_ups;
-use gateway::SqliteDatabaseGateway;
 use minijinja::context;
 use minijinja::Environment;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use std::sync::Arc;
 use tower_http::services::ServeDir;
 use ulid::Ulid;
 use url::Url;
+
+use domain::show_home_page;
+use gateway::SqliteDatabaseGateway;
 
 pub async fn build_app<T: Clone + Send + Sync + 'static>(
     assets_dir: impl AsRef<Path>,
@@ -36,9 +38,10 @@ pub async fn index(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("home")?;
-    let past_meet_ups = list_past_meet_ups(&state.database_gateway).await?;
+    let (future_meet_up, past_meet_ups) = show_home_page(&state.database_gateway, &state.database_gateway).await?;
 
     let context = context! {
+        future_meet_up => future_meet_up,
         past_meetups => past_meet_ups,
     };
     match is_hx_request {
@@ -86,12 +89,9 @@ pub async fn past_meet_up_metadata(
     Ok(Html(tmpl.render(context)?))
 }
 
-impl<T> From<T> for HtmlError
-where
-    T: std::error::Error,
-{
-    fn from(e: T) -> Self {
-        tracing::error!("Unexpected error: {e}");
+impl<E> From<E> for HtmlError where E: std::fmt::Display {
+    fn from(err: E) -> Self {
+        tracing::error!("Unexpected error: {}", err);
         HtmlError
     }
 }
@@ -193,8 +193,8 @@ struct PastMeetUp {
 }
 
 fn md_to_html<S>(md: &str, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: serde::Serializer,
+    where
+        S: serde::Serializer,
 {
     let html = markdown::to_html(md);
     serializer.serialize_str(&html)

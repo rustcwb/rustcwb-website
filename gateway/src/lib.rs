@@ -1,10 +1,9 @@
 use anyhow::{anyhow, Result};
-use domain::{
-    GetPastMeetUpError, ListPastMeetUpsError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata,
-};
-use sqlx::{sqlite::SqliteRow, Error, Row, SqlitePool};
+use sqlx::{Error, Row, sqlite::SqliteRow, SqlitePool};
 use ulid::Ulid;
 use url::Url;
+
+use domain::{FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError, GetPastMeetUpError, ListPastMeetUpsError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata};
 
 pub struct SqliteDatabaseGateway {
     sqlite_pool: SqlitePool,
@@ -62,5 +61,39 @@ impl PastMeetUpGateway for SqliteDatabaseGateway {
                 Error::RowNotFound => GetPastMeetUpError::NotFound(id),
                 _ => GetPastMeetUpError::Unknown(anyhow!("SQLX Error: {err}")),
             })
+    }
+}
+
+impl FutureMeetUpGateway for SqliteDatabaseGateway {
+    async fn get_future_meet_up(&self) -> Result<Option<FutureMeetUp>, GetFutureMeetUpError> {
+        let result = sqlx::query("SELECT * FROM future_meet_ups WHERE id = ?")
+            .try_map(|row: SqliteRow| {
+                let state = match row.get::<i32, _>("state") {
+                    0 => FutureMeetUpState::CallForPapers,
+                    1 => FutureMeetUpState::Voting,
+                    2 => FutureMeetUpState::Scheduled {
+                        title: row.get("title"),
+                        description: row.get("description"),
+                        speaker: row.get("speaker"),
+                    },
+                    _ => return Err(Error::Decode("Unknown state".into())),
+                };
+                Ok(FutureMeetUp::new(
+                    Ulid::from_bytes(
+                        row.try_get::<&[u8], _>("id")?
+                            .try_into()
+                            .map_err(|err| Error::Decode(Box::new(err)))?,
+                    ),
+                    state,
+                    row.get("date"),
+                ))
+            })
+            .fetch_one(&self.sqlite_pool)
+            .await;
+        match result {
+            Ok(future_meet_up) => Ok(Some(future_meet_up)),
+            Err(Error::RowNotFound) => Ok(None),
+            Err(err) => Err(GetFutureMeetUpError::Unknown(anyhow!("SQLX Error: {err}"))),
+        }
     }
 }
