@@ -1,0 +1,12 @@
+<div
+    class="flex flex-col p-4 hover:bg-rustDark transition ease-in-out duration-150"
+    id="meetup-{{ meetup.id }}"
+    hx-get="/pastMeetUp/{{ meetup.id }}"
+    hx-target="#meetup-{{ meetup.id }}"
+    hx-swap="outerHTML"
+>
+    <div class="flex flex-row justify-between text-md">
+        <div class="font-bold">{{ meetup.title }}</div>
+        <div>{{ meetup.date }}</div>
+    </div>
+</div>

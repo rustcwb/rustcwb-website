@@ -4,10 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+gateway = { path = "../gateway" }
+domain = { path = "../domain" }
 anyhow = "1"
 axum = { version = "0.7" }
 axum-htmx = "0.5"
 chrono = { version = "0.4.38", features = ["serde"] }
+dotenv = "0.15.0"
 markdown = "1.0.0-alpha.17"
 minijinja = { version = "1" }
 serde = { version = "1", features = ["derive"] }

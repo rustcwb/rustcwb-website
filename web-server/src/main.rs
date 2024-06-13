@@ -2,11 +2,13 @@ mod app;
 
 use crate::app::build_app;
 use anyhow::Result;
+use std::env::var;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 use tracing::Level;
 
 #[::tokio::main]
 async fn main() -> Result<()> {
+    dotenv::dotenv()?;
     let subscriber = tracing_subscriber::fmt()
         .compact()
         .with_file(true)
@@ -14,7 +16,8 @@ async fn main() -> Result<()> {
         .with_max_level(Level::DEBUG)
         .finish();
     tracing::subscriber::set_global_default(subscriber)?;
-    let app = build_app("web-server/public")?
+    let app = build_app("web-server/public", var("DATABASE_URL")?)
+        .await?
         .layer(CompressionLayer::new())
         .layer(TraceLayer::new_for_http());
 
