@@ -64,9 +64,11 @@ pub async fn admin(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("home")?;
-    let past_meet_ups = list_past_meet_ups(&state.database_gateway).await?;
+    let (future_meet_up, past_meet_ups) =
+        show_home_page(&state.database_gateway, &state.database_gateway).await?;
 
     let context = context! {
+        future_meet_up => future_meet_up,
         past_meetups => past_meet_ups,
     };
     match is_hx_request {

@@ -26,3 +26,5 @@ tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 ulid = { version = "1.1.2", features = ["serde"] }
 url = { version = "2.5.1", features = ["serde"] }
+async-trait = "0.1.80"
+base64 = "0.22.1"

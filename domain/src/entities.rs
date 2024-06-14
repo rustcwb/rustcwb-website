@@ -24,6 +24,7 @@ pub struct PastMeetUpMetadata {
 pub struct FutureMeetUp {
     id: Ulid,
     state: FutureMeetUpState,
+    location: String,
     date: NaiveDate,
 }
 
@@ -39,8 +40,13 @@ pub enum FutureMeetUpState {
 }
 
 impl FutureMeetUp {
-    pub fn new(id: Ulid, state: FutureMeetUpState, date: NaiveDate) -> Self {
-        Self { id, state, date }
+    pub fn new(id: Ulid, state: FutureMeetUpState, location: String, date: NaiveDate) -> Self {
+        Self {
+            id,
+            state,
+            location,
+            date,
+        }
     }
 }
 

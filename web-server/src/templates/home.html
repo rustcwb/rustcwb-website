@@ -2,21 +2,22 @@
 <div class="flex flex-col items-left justify-items-start my-3 text-lg">
     <section class="flex items-center justify-center">
         <div
-                class="flex items-center justify-between flex-col lg:flex-row px-4 data-width"
+            class="flex items-center justify-between flex-col xl:flex-row px-4 data-width overflow-hidden"
         >
             <div class="flex flex-col">
                 <h1 class="text-7xl md:text-8xl font-bold">RustCWB</h1>
                 <p class="mt-2">Oxidize Curitiba</p>
             </div>
-            <img
+            <div class="p-4 rounded-lg shadow-md w-full">
+                <img
                     alt="Foto do grupo de rust"
-                    class="p-4 rounded-lg shadow-md w-full"
                     src="/assets/openart-image_h87n6XLu_1718314953055_raw.png"
-            />
+                />
+            </div>
         </div>
     </section>
     <section
-            class="flex px-4 py-6 bg-rust text-white justify-center items-center"
+        class="flex px-4 py-6 bg-rust text-white justify-center items-center"
     >
         <div class="flex flex-col data-width">
             <h2 class="text-2xl font-bold">Sobre o Grupo</h2>
@@ -45,7 +46,8 @@
                         Threads vs Green Threads vs Gorotines vs Tokio Tasks
                     </h3>
                 </header>
-                <div>Data:
+                <div>
+                    Data:
                     <time datetime="2024-07-14">2024-07-14</time>
                 </div>
                 <p>Speaker: Bruno Clemente</p>
@@ -55,22 +57,22 @@
                 <p class="text-md py-2">
                     Para se inscrever
                     <a
-                            class="underline transition ease-in-out duration-150 hover:text-rust"
-                            href="#"
-                    >click aqui</a
+                        class="underline transition ease-in-out duration-150 hover:text-rust"
+                        href="#"
+                        >click aqui</a
                     >. É gratuito.
                 </p>
                 {% else %}
                 <p class="text-md py-2">
-                    Ainda não temos um próximo meetup agendado. Fique ligado
-                    que avisaremos aqui quando tivermos.
+                    Ainda não temos um próximo meetup agendado. Fique ligado que
+                    avisaremos aqui quando tivermos.
                 </p>
                 {% endif %}
             </article>
         </div>
     </section>
     <section
-            class="flex px-4 py-6 bg-rust text-white justify-center items-center"
+        class="flex px-4 py-6 bg-rust text-white justify-center items-center"
     >
         <div class="flex flex-col data-width">
             <h2 class="text-2xl font-bold">MeetUps antigos</h2>

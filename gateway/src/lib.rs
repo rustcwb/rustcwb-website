@@ -1,9 +1,12 @@
 use anyhow::{anyhow, Result};
-use sqlx::{Error, Row, sqlite::SqliteRow, SqlitePool};
+use sqlx::{sqlite::SqliteRow, Error, Row, SqlitePool};
 use ulid::Ulid;
 use url::Url;
 
-use domain::{FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError, GetPastMeetUpError, ListPastMeetUpsError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata};
+use domain::{
+    FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError, GetPastMeetUpError,
+    ListPastMeetUpsError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata,
+};
 
 pub struct SqliteDatabaseGateway {
     sqlite_pool: SqlitePool,
@@ -85,6 +88,7 @@ impl FutureMeetUpGateway for SqliteDatabaseGateway {
                             .map_err(|err| Error::Decode(Box::new(err)))?,
                     ),
                     state,
+                    row.get("location"),
                     row.get("date"),
                 ))
             })
