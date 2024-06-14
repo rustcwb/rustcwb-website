@@ -2,12 +2,16 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::Result;
-use axum::{extract::State, response::Html};
-use axum::extract::Path as PathExtractor;
+use axum::extract::{FromRequestParts, Path as PathExtractor};
+use axum::http::header::{AUTHORIZATION, WWW_AUTHENTICATE};
+use axum::http::request::Parts;
+use axum::http::{HeaderMap, HeaderName, StatusCode};
 use axum::response::IntoResponse;
-use axum::Router;
 use axum::routing::get;
+use axum::{async_trait, Router};
+use axum::{extract::State, response::Html};
 use axum_htmx::HxRequest;
+use base64::prelude::*;
 use chrono::NaiveDate;
 use minijinja::context;
 use minijinja::Environment;
@@ -22,13 +26,16 @@ use gateway::SqliteDatabaseGateway;
 pub async fn build_app<T: Clone + Send + Sync + 'static>(
     assets_dir: impl AsRef<Path>,
     database_url: String,
+    admin_details: (String, String),
 ) -> Result<Router<T>> {
     Ok(Router::new()
         .route("/", get(index))
+        .route("/admin", get(admin))
         .route("/pastMeetUp/:id", get(past_meet_up))
         .route("/pastMeetUp/metadata/:id", get(past_meet_up_metadata))
         .with_state(Arc::new(AppState::new(
             SqliteDatabaseGateway::new(database_url).await?,
+            admin_details,
         )?))
         .fallback_service(ServeDir::new(assets_dir.as_ref())))
 }
@@ -38,10 +45,28 @@ pub async fn index(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("home")?;
-    let (future_meet_up, past_meet_ups) = show_home_page(&state.database_gateway, &state.database_gateway).await?;
+    let (future_meet_up, past_meet_ups) =
+        show_home_page(&state.database_gateway, &state.database_gateway).await?;
 
     let context = context! {
         future_meet_up => future_meet_up,
+        past_meetups => past_meet_ups,
+    };
+    match is_hx_request {
+        true => Ok(Html(tmpl.eval_to_state(context)?.render_block("content")?)),
+        false => Ok(Html(tmpl.render(context)?)),
+    }
+}
+
+pub async fn admin(
+    _: AdminUser,
+    HxRequest(is_hx_request): HxRequest,
+    State(state): State<Arc<AppState>>,
+) -> Result<Html<String>, HtmlError> {
+    let tmpl = state.get_minijinja_env().get_template("home")?;
+    let past_meet_ups = list_past_meet_ups(&state.database_gateway).await?;
+
+    let context = context! {
         past_meetups => past_meet_ups,
     };
     match is_hx_request {
@@ -89,7 +114,10 @@ pub async fn past_meet_up_metadata(
     Ok(Html(tmpl.render(context)?))
 }
 
-impl<E> From<E> for HtmlError where E: std::fmt::Display {
+impl<E> From<E> for HtmlError
+where
+    E: std::fmt::Display,
+{
     fn from(err: E) -> Self {
         tracing::error!("Unexpected error: {}", err);
         HtmlError
@@ -142,12 +170,16 @@ impl IntoResponse for HtmlError {
 }
 
 pub struct AppState {
+    admin_details: (String, String),
     database_gateway: SqliteDatabaseGateway,
     minijinja_enviroment: Environment<'static>,
 }
 
 impl AppState {
-    pub fn new(database_gateway: SqliteDatabaseGateway) -> Result<Self> {
+    pub fn new(
+        database_gateway: SqliteDatabaseGateway,
+        admin_details: (String, String),
+    ) -> Result<Self> {
         let mut env = Environment::new();
         env.add_template("base", include_str!("templates/base.html"))?;
         env.add_template("home", include_str!("templates/home.html"))?;
@@ -164,6 +196,7 @@ impl AppState {
             include_str!("templates/components/past_meet_up.html"),
         )?;
         Ok(Self {
+            admin_details,
             database_gateway,
             minijinja_enviroment: env,
         })
@@ -193,9 +226,56 @@ struct PastMeetUp {
 }
 
 fn md_to_html<S>(md: &str, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
+where
+    S: serde::Serializer,
 {
     let html = markdown::to_html(md);
     serializer.serialize_str(&html)
+}
+
+pub struct AdminUser();
+
+#[async_trait]
+impl FromRequestParts<Arc<AppState>> for AdminUser {
+    type Rejection = (StatusCode, HeaderMap);
+
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Arc<AppState>,
+    ) -> Result<Self, Self::Rejection> {
+        parts
+            .headers
+            .get(AUTHORIZATION)
+            .and_then(|header| {
+                let header = header.to_str().ok()?;
+                let encoded = header.strip_prefix("Basic ")?;
+                let decoded = BASE64_STANDARD.decode(encoded).ok()?;
+                let decoded = String::from_utf8_lossy(&decoded);
+                let Some((user, pass)) = decoded.split_once(':') else {
+                    return None;
+                };
+                if user == state.admin_details.0 && pass == state.admin_details.1 {
+                    Some(AdminUser)
+                } else {
+                    None
+                }
+            })
+            .ok_or((
+                StatusCode::UNAUTHORIZED,
+                headers_map(&[(WWW_AUTHENTICATE, "Basic realm=\"admin\", charset=\"UTF-8\"")])
+                    .map_err(|err| {
+                        tracing::error!("Error creating headers map: {err}");
+                        (StatusCode::INTERNAL_SERVER_ERROR, HeaderMap::new())
+                    })?,
+            ))?;
+        Ok(AdminUser())
+    }
+}
+
+fn headers_map(headers: &[(HeaderName, &str)]) -> Result<HeaderMap> {
+    let mut header_map = HeaderMap::new();
+    for (header_name, value) in headers {
+        header_map.insert(header_name.clone(), value.parse()?);
+    }
+    Ok(header_map)
 }
