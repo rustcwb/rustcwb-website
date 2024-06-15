@@ -2,19 +2,23 @@
 <div class="flex flex-col items-left justify-items-start my-3 text-lg">
     <section class="flex flex-col p-4 items-center">
         <div class="flex flex-col data-width">
-            <h2 class="text-2xl font-bold">Próximo Meetup</h2>
             <article class="flex-col mt-3" id="futureMeetup">
                 {% if future_meet_up %} {% else %}
                 <p class="text-md py-2">No future meetup yet.</p>
                 <form
                     hx-post="/admin/createFutureMeetUp"
                     hx-target="futureMeetup"
+                    class="flex flex-col items-left justify-items-start space-y-3 mt-4"
                 >
                     <label for="location">Location:</label>
                     <input type="text" name="location" />
                     <label for="date">Date:</label>
                     <input type="date" name="date" />
-                    <input type="submit" value="Create" />
+                    <input
+                        type="submit"
+                        value="Create"
+                        class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
+                    />
                 </form>
                 {% endif %}
             </article>

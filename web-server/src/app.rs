@@ -63,13 +63,12 @@ pub async fn admin(
     HxRequest(is_hx_request): HxRequest,
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
-    let tmpl = state.get_minijinja_env().get_template("home")?;
-    let (future_meet_up, past_meet_ups) =
+    let tmpl = state.get_minijinja_env().get_template("admin")?;
+    let (future_meet_up, _) =
         show_home_page(&state.database_gateway, &state.database_gateway).await?;
 
     let context = context! {
         future_meet_up => future_meet_up,
-        past_meetups => past_meet_ups,
     };
     match is_hx_request {
         true => Ok(Html(tmpl.eval_to_state(context)?.render_block("content")?)),
@@ -83,7 +82,7 @@ pub async fn past_meet_up(
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state
         .get_minijinja_env()
-        .get_template("components/past_meet_up")?;
+        .get_template("components/past_meet_ups/past_meet_up")?;
     let meetup = PastMeetUp {
         id: Ulid::new(),
         title: "Rust Meetup".to_string(),
@@ -104,7 +103,7 @@ pub async fn past_meet_up_metadata(
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state
         .get_minijinja_env()
-        .get_template("components/past_meet_up_metadata")?;
+        .get_template("components/past_meet_ups/past_meet_up_metadata")?;
     let meetup = PastMeetUpMetadata {
         id: Ulid::new(),
         title: "Rust Meetup".to_string(),
@@ -185,17 +184,18 @@ impl AppState {
         let mut env = Environment::new();
         env.add_template("base", include_str!("templates/base.html"))?;
         env.add_template("home", include_str!("templates/home.html"))?;
+        env.add_template("admin", include_str!("templates/admin.html"))?;
         env.add_template(
-            "components/past_meet_ups",
-            include_str!("templates/components/past_meet_ups.html"),
+            "components/past_meet_ups/past_meet_ups",
+            include_str!("templates/components/past_meet_ups/past_meet_ups.html"),
         )?;
         env.add_template(
-            "components/past_meet_up_metadata",
-            include_str!("templates/components/past_meet_up_metadata.html"),
+            "components/past_meet_ups/past_meet_up_metadata",
+            include_str!("templates/components/past_meet_ups/past_meet_up_metadata.html"),
         )?;
         env.add_template(
-            "components/past_meet_up",
-            include_str!("templates/components/past_meet_up.html"),
+            "components/past_meet_ups/past_meet_up",
+            include_str!("templates/components/past_meet_ups/past_meet_up.html"),
         )?;
         Ok(Self {
             admin_details,
