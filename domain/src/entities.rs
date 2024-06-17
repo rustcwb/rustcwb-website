@@ -1,4 +1,7 @@
-use chrono::NaiveDate;
+use std::fmt::Debug;
+
+use chrono::{DateTime, NaiveDate, Utc};
+use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 use url::Url;
@@ -74,4 +77,81 @@ impl PastMeetUpMetadata {
     pub fn new(id: Ulid, title: String, date: NaiveDate) -> Self {
         Self { id, title, date }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct User {
+    pub id: Ulid,
+    pub nickname: String,
+    pub email: String,
+    pub access_token: AccessToken,
+    pub login_method: LoginMethod,
+}
+
+impl User {
+    pub fn new(
+        id: Ulid,
+        nickname: String,
+        email: String,
+        access_token: AccessToken,
+        login_method: LoginMethod,
+    ) -> Self {
+        Self {
+            id,
+            nickname,
+            email,
+            access_token,
+            login_method,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AccessToken {
+    token: String,
+    expire_at: DateTime<Utc>,
+}
+
+impl AccessToken {
+    pub fn generate_new() -> Self {
+        Self {
+            token: Alphanumeric.sample_string(&mut rand::thread_rng(), 32),
+            expire_at: Utc::now() + chrono::Duration::days(1),
+        }
+    }
+
+    pub fn new(token: String, expire_at: DateTime<Utc>) -> Self {
+        Self { token, expire_at }
+    }
+
+    pub fn is_expired(&self) -> bool {
+        Utc::now() > self.expire_at
+    }
+
+    pub fn token(&self) -> &str {
+        &self.token
+    }
+
+    pub fn expire_at(&self) -> &DateTime<Utc> {
+        &self.expire_at
+    }
+}
+
+impl Debug for AccessToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "AccessToken{{token: {}***, expire_at: {}}}",
+            self.token.chars().take(6).collect::<String>(),
+            self.expire_at
+        )
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LoginMethod {
+    Github {
+        access_token: AccessToken,
+        refresh_token: AccessToken,
+    },
 }

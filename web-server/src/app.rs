@@ -1,18 +1,23 @@
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 
-use anyhow::Result;
-use axum::{async_trait, Form, Router};
-use axum::{extract::State, response::Html};
-use axum::extract::{FromRequestParts, Path as PathExtractor};
-use axum::http::{HeaderMap, HeaderName, StatusCode};
+use anyhow::{anyhow, Result};
+use axum::extract::{FromRequestParts, Path as PathExtractor, Query};
 use axum::http::header::{AUTHORIZATION, WWW_AUTHENTICATE};
 use axum::http::request::Parts;
-use axum::response::IntoResponse;
+use axum::http::{HeaderMap, HeaderName, StatusCode};
+use axum::response::{IntoResponse, Redirect};
 use axum::routing::{get, post};
+use axum::{async_trait, Form, Router};
+use axum::{extract::State, response::Html};
+use axum_extra::extract::cookie::{Cookie, Expiration};
+use axum_extra::extract::CookieJar;
 use axum_htmx::HxRequest;
 use base64::prelude::*;
-use chrono::NaiveDate;
+use chrono::{Duration, NaiveDate, Utc};
+use domain::{login_with_access_token, login_with_github_code};
+use gateway::github::GithubRestGateway;
 use minijinja::context;
 use minijinja::Environment;
 use serde::{Deserialize, Serialize};
@@ -20,28 +25,36 @@ use tower_http::services::ServeDir;
 use ulid::Ulid;
 use url::Url;
 
-use domain::{create_new_future_meet_up, FutureMeetUp, FutureMeetUpState, get_past_meet_up, get_past_meet_up_metadata, PastMeetUp, show_home_page};
+use domain::{
+    create_new_future_meet_up, get_past_meet_up, get_past_meet_up_metadata, show_home_page,
+    FutureMeetUp, FutureMeetUpState, PastMeetUp, User,
+};
 use gateway::SqliteDatabaseGateway;
 
 pub async fn build_app<T: Clone + Send + Sync + 'static>(
     assets_dir: impl AsRef<Path>,
     database_url: String,
     admin_details: (String, String),
+    (client_id, client_secret): (String, String),
 ) -> Result<Router<T>> {
     Ok(Router::new()
         .route("/", get(index))
+        .route("/github/authorize", get(github_login))
         .route("/admin", get(admin))
         .route("/admin/createFutureMeetUp", post(create_future_meet_up))
         .route("/pastMeetUp/:id", get(past_meet_up))
         .route("/pastMeetUp/metadata/:id", get(past_meet_up_metadata))
         .with_state(Arc::new(AppState::new(
             SqliteDatabaseGateway::new(database_url).await?,
+            GithubRestGateway::new(client_id.clone(), client_secret),
+            client_id,
             admin_details,
         )?))
         .fallback_service(ServeDir::new(assets_dir.as_ref())))
 }
 
 pub async fn index(
+    maybe_user: MaybeUser,
     HxRequest(is_hx_request): HxRequest,
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
@@ -50,6 +63,8 @@ pub async fn index(
         show_home_page(&state.database_gateway, &state.database_gateway).await?;
 
     let context = context! {
+        user => maybe_user.0.map(|u| UserPresenter::from(u)),
+        client_id => state.github_client_id.clone(),
         future_meet_up => future_meet_up,
         past_meetups => past_meet_ups,
     };
@@ -57,6 +72,22 @@ pub async fn index(
         true => Ok(Html(tmpl.eval_to_state(context)?.render_block("content")?)),
         false => Ok(Html(tmpl.render(context)?)),
     }
+}
+
+pub async fn github_login(
+    Query(query): Query<HashMap<String, String>>,
+    cookie_jar: CookieJar,
+    State(state): State<Arc<AppState>>,
+) -> Result<(CookieJar, Redirect), HtmlError> {
+    let code = query
+        .get("code")
+        .ok_or_else(|| anyhow!("No code in query"))?
+        .to_string();
+    let user = login_with_github_code(&state.database_gateway, &state.github_gateway, code).await?;
+    // TODO: Add an expiration time
+    let mut cookie = Cookie::new("access_token", user.access_token.token().to_string());
+    cookie.set_path("/");
+    Ok(dbg!((cookie_jar.add(cookie), Redirect::to("/"))))
 }
 
 pub async fn admin(
@@ -82,8 +113,11 @@ pub async fn create_future_meet_up(
     State(state): State<Arc<AppState>>,
     Form(params): Form<CreateFutureMeetUpParam>,
 ) -> Result<Html<String>, HtmlError> {
-    let tmpl = state.get_minijinja_env().get_template("components/admin/future_meet_up/future_meet_up")?;
-    let meet_up = create_new_future_meet_up(&state.database_gateway, params.location, params.date).await?;
+    let tmpl = state
+        .get_minijinja_env()
+        .get_template("components/admin/future_meet_up/future_meet_up")?;
+    let meet_up =
+        create_new_future_meet_up(&state.database_gateway, params.location, params.date).await?;
 
     let context = context! {
         future_meet_up => FutureMeetUpPresenter::from(meet_up),
@@ -126,8 +160,8 @@ pub async fn past_meet_up_metadata(
 }
 
 impl<E> From<E> for HtmlError
-    where
-        E: std::fmt::Display,
+where
+    E: std::fmt::Display,
 {
     fn from(err: E) -> Self {
         tracing::error!("Unexpected error: {}", err);
@@ -183,12 +217,16 @@ impl IntoResponse for HtmlError {
 pub struct AppState {
     admin_details: (String, String),
     database_gateway: SqliteDatabaseGateway,
+    github_gateway: GithubRestGateway,
+    github_client_id: String,
     minijinja_enviroment: Environment<'static>,
 }
 
 impl AppState {
     pub fn new(
         database_gateway: SqliteDatabaseGateway,
+        github_gateway: GithubRestGateway,
+        github_client_id: String,
         admin_details: (String, String),
     ) -> Result<Self> {
         let mut env = Environment::new();
@@ -222,6 +260,8 @@ impl AppState {
 
         Ok(Self {
             admin_details,
+            github_gateway,
+            github_client_id,
             database_gateway,
             minijinja_enviroment: env,
         })
@@ -255,8 +295,6 @@ impl From<PastMeetUp> for PastMeetUpPresenter {
     }
 }
 
-pub struct AdminUser();
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct FutureMeetUpPresenter {
     id: Ulid,
@@ -276,8 +314,15 @@ impl From<FutureMeetUp> for FutureMeetUpPresenter {
                 description,
                 speaker,
             } => ("Scheduled".into(), title, description, speaker),
-            FutureMeetUpState::CallForPapers => ("CallForPapers".into(), String::new(), String::new(), String::new()),
-            FutureMeetUpState::Voting => ("Voting".into(), String::new(), String::new(), String::new()),
+            FutureMeetUpState::CallForPapers => (
+                "CallForPapers".into(),
+                String::new(),
+                String::new(),
+                String::new(),
+            ),
+            FutureMeetUpState::Voting => {
+                ("Voting".into(), String::new(), String::new(), String::new())
+            }
         };
         Self {
             id: meetup.id,
@@ -290,6 +335,8 @@ impl From<FutureMeetUp> for FutureMeetUpPresenter {
         }
     }
 }
+
+pub struct AdminUser();
 
 #[async_trait]
 impl FromRequestParts<Arc<AppState>> for AdminUser {
@@ -328,10 +375,56 @@ impl FromRequestParts<Arc<AppState>> for AdminUser {
     }
 }
 
+#[derive(Debug)]
+pub struct MaybeUser(Option<User>);
+
+#[async_trait]
+impl FromRequestParts<Arc<AppState>> for MaybeUser {
+    type Rejection = (StatusCode, HeaderMap);
+
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Arc<AppState>,
+    ) -> Result<Self, Self::Rejection> {
+        let cookie_jar = CookieJar::from_request_parts(parts, state)
+            .await
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, HeaderMap::new()))?;
+        match cookie_jar.get("access_token") {
+            Some(cookie) => {
+                let access_token = cookie.value();
+                let user = dbg!(
+                    login_with_access_token(
+                        &state.database_gateway,
+                        &state.github_gateway,
+                        access_token,
+                    )
+                    .await
+                )
+                .ok();
+                Ok(MaybeUser(user))
+            }
+            None => Ok(MaybeUser(None)),
+        }
+    }
+}
+
 fn headers_map(headers: &[(HeaderName, &str)]) -> Result<HeaderMap> {
     let mut header_map = HeaderMap::new();
     for (header_name, value) in headers {
         header_map.insert(header_name.clone(), value.parse()?);
     }
     Ok(header_map)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct UserPresenter {
+    nickname: String,
+}
+
+impl From<User> for UserPresenter {
+    fn from(user: User) -> Self {
+        Self {
+            nickname: user.nickname.chars().take(10).collect::<String>(),
+        }
+    }
 }

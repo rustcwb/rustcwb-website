@@ -20,6 +20,7 @@ async fn main() -> Result<()> {
         "web-server/public",
         var("DATABASE_URL")?,
         (var("ADMIN_USER")?, var("ADMIN_PASSWORD")?),
+        (var("GITHUB_CLIENT_ID")?, var("GITHUB_CLIENT_SECRET")?),
     )
     .await?
     .layer(CompressionLayer::new())
