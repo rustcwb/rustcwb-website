@@ -1,57 +1,58 @@
 <!doctype html>
 <html lang="pt">
-    <head>
-        <title>{% block title %}RustCWB{% endblock %}</title>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
+<head>
+    <title>{% block title %}RustCWB{% endblock %}</title>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="/assets/css/styles.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link
+            href="/assets/favicon-16x16.png"
             rel="icon"
             sizes="16x16"
             type="image/png"
-            href="/assets/favicon-16x16.png"
-        />
-        <link
+    />
+    <link
+            href="/assets/favicon-32x32.png"
             rel="icon"
             sizes="32x32"
             type="image/png"
-            href="/assets/favicon-32x32.png"
-        />
-        <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-        <link
+    />
+    <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+    <link
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
             rel="stylesheet"
-        />
-        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    </head>
+    />
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
 
-    <body class="flex flex-col h-screen bg-zinc-50 text-md font-jetBrains">
-        <header>
-            <nav class="bg-black text-white text-lg">
-                <div class="flex justify-between items-center p-4">
-                    <a
-                        class="font-bold cursor-pointer"
-                        hx-get="/"
-                        hx-target="#main-content"
-                        >RustCWB 🦀</a
-                    >
-                    <span class="hidden md:contents"
-                        >The Rust Lang Meet Up Group of Curitiba</span
-                    >
-                    <ul class="flex space-x-6">
-                        <li><a href="/meet_ups">Meet Ups</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </div>
-            </nav>
-        </header>
-        <main class="flex flex-col mb-auto" id="main-content">
-            {% block content %}{% endblock %}
-        </main>
-        <footer class="bg-black text-white">
-            <p class="text-center text-lg p-4">RustCWB - 2024</p>
-        </footer>
-    </body>
+<body class="flex flex-col h-screen bg-zinc-50 text-md font-jetBrains">
+<header>
+    <nav class="bg-black text-white text-lg">
+        <div class="flex justify-between items-center p-4">
+            <a
+                    class="font-bold cursor-pointer"
+                    hx-get="/"
+                    hx-push-url="true"
+                    hx-target="#main-content"
+            >RustCWB 🦀</a
+            >
+            <span class="hidden md:contents"
+            >The Rust Lang Meet Up Group of Curitiba</span
+            >
+            <ul class="flex space-x-6">
+                <li><a href="/meet_ups">Meet Ups</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<main class="flex flex-col mb-auto" id="main-content">
+    {% block content %}{% endblock %}
+</main>
+<footer class="bg-black text-white">
+    <p class="text-center text-lg p-4">RustCWB - 2024</p>
+</footer>
+</body>
 </html>

@@ -1,0 +1,16 @@
+<article class="flex-col mt-3" id="futureMeetup">
+    <p class="text-md py-2">In call for papers</p>
+    <p class="text-md py-2">Location {{ future_meet_up.location }}</p>
+    <p class="text-md py-2">Date {{ future_meet_up.date }}</p>
+    <form
+            class="flex flex-col items-left justify-items-start space-y-3 mt-4"
+            hx-post="/admin/createFutureMeetUp"
+            hx-target="#futureMeetup"
+    >
+        <input
+                class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
+                type="submit"
+                value="Go to voting"
+        />
+    </form>
+</article>

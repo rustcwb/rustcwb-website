@@ -2,14 +2,14 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::Result;
+use axum::{async_trait, Form, Router};
+use axum::{extract::State, response::Html};
 use axum::extract::{FromRequestParts, Path as PathExtractor};
+use axum::http::{HeaderMap, HeaderName, StatusCode};
 use axum::http::header::{AUTHORIZATION, WWW_AUTHENTICATE};
 use axum::http::request::Parts;
-use axum::http::{HeaderMap, HeaderName, StatusCode};
 use axum::response::IntoResponse;
-use axum::routing::get;
-use axum::{async_trait, Router};
-use axum::{extract::State, response::Html};
+use axum::routing::{get, post};
 use axum_htmx::HxRequest;
 use base64::prelude::*;
 use chrono::NaiveDate;
@@ -20,7 +20,7 @@ use tower_http::services::ServeDir;
 use ulid::Ulid;
 use url::Url;
 
-use domain::show_home_page;
+use domain::{create_new_future_meet_up, FutureMeetUp, FutureMeetUpState, get_past_meet_up, get_past_meet_up_metadata, PastMeetUp, show_home_page};
 use gateway::SqliteDatabaseGateway;
 
 pub async fn build_app<T: Clone + Send + Sync + 'static>(
@@ -31,6 +31,7 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
     Ok(Router::new()
         .route("/", get(index))
         .route("/admin", get(admin))
+        .route("/admin/createFutureMeetUp", post(create_future_meet_up))
         .route("/pastMeetUp/:id", get(past_meet_up))
         .route("/pastMeetUp/metadata/:id", get(past_meet_up_metadata))
         .with_state(Arc::new(AppState::new(
@@ -68,12 +69,32 @@ pub async fn admin(
         show_home_page(&state.database_gateway, &state.database_gateway).await?;
 
     let context = context! {
-        future_meet_up => future_meet_up,
+        future_meet_up => future_meet_up.map(|fut| FutureMeetUpPresenter::from(fut)),
     };
     match is_hx_request {
         true => Ok(Html(tmpl.eval_to_state(context)?.render_block("content")?)),
         false => Ok(Html(tmpl.render(context)?)),
     }
+}
+
+pub async fn create_future_meet_up(
+    _: AdminUser,
+    State(state): State<Arc<AppState>>,
+    Form(params): Form<CreateFutureMeetUpParam>,
+) -> Result<Html<String>, HtmlError> {
+    let tmpl = state.get_minijinja_env().get_template("components/admin/future_meet_up/future_meet_up")?;
+    let meet_up = create_new_future_meet_up(&state.database_gateway, params.location, params.date).await?;
+
+    let context = context! {
+        future_meet_up => FutureMeetUpPresenter::from(meet_up),
+    };
+    Ok(Html(tmpl.render(context)?))
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateFutureMeetUpParam {
+    location: String,
+    date: NaiveDate,
 }
 
 pub async fn past_meet_up(
@@ -83,16 +104,9 @@ pub async fn past_meet_up(
     let tmpl = state
         .get_minijinja_env()
         .get_template("components/past_meet_ups/past_meet_up")?;
-    let meetup = PastMeetUp {
-        id: Ulid::new(),
-        title: "Rust Meetup".to_string(),
-        date: NaiveDate::from_ymd_opt(2021, 10, 10).unwrap(),
-        description: "This is a Rust Meetup".to_string(),
-        speaker: "Bruno Clemente".to_string(),
-        link: Url::parse("https://www.rust-lang.org").unwrap(),
-    };
+    let meetup = get_past_meet_up(&state.database_gateway, id).await?;
     let context = context! {
-        meetup => meetup,
+        meetup => PastMeetUpPresenter::from(meetup)
     };
     Ok(Html(tmpl.render(context)?))
 }
@@ -104,11 +118,7 @@ pub async fn past_meet_up_metadata(
     let tmpl = state
         .get_minijinja_env()
         .get_template("components/past_meet_ups/past_meet_up_metadata")?;
-    let meetup = PastMeetUpMetadata {
-        id: Ulid::new(),
-        title: "Rust Meetup".to_string(),
-        date: NaiveDate::from_ymd_opt(2021, 10, 10).unwrap(),
-    };
+    let meetup = get_past_meet_up_metadata(&state.database_gateway, id).await?;
     let context = context! {
         meetup => meetup,
     };
@@ -116,8 +126,8 @@ pub async fn past_meet_up_metadata(
 }
 
 impl<E> From<E> for HtmlError
-where
-    E: std::fmt::Display,
+    where
+        E: std::fmt::Display,
 {
     fn from(err: E) -> Self {
         tracing::error!("Unexpected error: {}", err);
@@ -197,6 +207,19 @@ impl AppState {
             "components/past_meet_ups/past_meet_up",
             include_str!("templates/components/past_meet_ups/past_meet_up.html"),
         )?;
+        env.add_template(
+            "components/admin/future_meet_up/future_meet_up",
+            include_str!("templates/components/admin/future_meet_up/future_meet_up.html"),
+        )?;
+        env.add_template(
+            "components/admin/future_meet_up/no_future_meet_up",
+            include_str!("templates/components/admin/future_meet_up/no_future_meet_up.html"),
+        )?;
+        env.add_template(
+            "components/admin/future_meet_up/call_for_papers",
+            include_str!("templates/components/admin/future_meet_up/call_for_papers.html"),
+        )?;
+
         Ok(Self {
             admin_details,
             database_gateway,
@@ -210,32 +233,63 @@ impl AppState {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct PastMeetUpMetadata {
+struct PastMeetUpPresenter {
     id: Ulid,
     title: String,
-    date: NaiveDate,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct PastMeetUp {
-    id: Ulid,
-    title: String,
-    #[serde(serialize_with = "md_to_html")]
     description: String,
     speaker: String,
     date: NaiveDate,
     link: Url,
 }
 
-fn md_to_html<S>(md: &str, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: serde::Serializer,
-{
-    let html = markdown::to_html(md);
-    serializer.serialize_str(&html)
+impl From<PastMeetUp> for PastMeetUpPresenter {
+    fn from(meetup: PastMeetUp) -> Self {
+        Self {
+            id: meetup.id,
+            title: meetup.title,
+            description: markdown::to_html(&meetup.description),
+            speaker: meetup.speaker,
+            date: meetup.date,
+            link: meetup.link,
+        }
+    }
 }
 
 pub struct AdminUser();
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct FutureMeetUpPresenter {
+    id: Ulid,
+    title: String,
+    state: String,
+    description: String,
+    speaker: String,
+    date: NaiveDate,
+    location: String,
+}
+
+impl From<FutureMeetUp> for FutureMeetUpPresenter {
+    fn from(meetup: FutureMeetUp) -> Self {
+        let (state, title, description, speaker) = match meetup.state {
+            FutureMeetUpState::Scheduled {
+                title,
+                description,
+                speaker,
+            } => ("Scheduled".into(), title, description, speaker),
+            FutureMeetUpState::CallForPapers => ("CallForPapers".into(), String::new(), String::new(), String::new()),
+            FutureMeetUpState::Voting => ("Voting".into(), String::new(), String::new(), String::new()),
+        };
+        Self {
+            id: meetup.id,
+            title,
+            state,
+            description,
+            speaker,
+            date: meetup.date,
+            location: meetup.location,
+        }
+    }
+}
 
 #[async_trait]
 impl FromRequestParts<Arc<AppState>> for AdminUser {

@@ -5,12 +5,12 @@ use url::Url;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PastMeetUp {
-    id: Ulid,
-    title: String,
-    description: String,
-    speaker: String,
-    date: NaiveDate,
-    link: Url,
+    pub id: Ulid,
+    pub title: String,
+    pub description: String,
+    pub speaker: String,
+    pub date: NaiveDate,
+    pub link: Url,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -22,10 +22,10 @@ pub struct PastMeetUpMetadata {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FutureMeetUp {
-    id: Ulid,
-    state: FutureMeetUpState,
-    location: String,
-    date: NaiveDate,
+    pub id: Ulid,
+    pub state: FutureMeetUpState,
+    pub location: String,
+    pub date: NaiveDate,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

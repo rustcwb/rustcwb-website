@@ -1,12 +1,10 @@
 use anyhow::{anyhow, Result};
-use sqlx::{sqlite::SqliteRow, Error, Row, SqlitePool};
+use chrono::NaiveDate;
+use sqlx::{Error, Row, sqlite::SqliteRow, SqlitePool};
 use ulid::Ulid;
 use url::Url;
 
-use domain::{
-    FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError, GetPastMeetUpError,
-    ListPastMeetUpsError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata,
-};
+use domain::{FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError, GetPastMeetUpError, ListPastMeetUpsError, NewFutureMeetUpError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata};
 
 pub struct SqliteDatabaseGateway {
     sqlite_pool: SqlitePool,
@@ -65,11 +63,33 @@ impl PastMeetUpGateway for SqliteDatabaseGateway {
                 _ => GetPastMeetUpError::Unknown(anyhow!("SQLX Error: {err}")),
             })
     }
+
+    async fn get_past_meet_up_metadata(&self, id: Ulid) -> Result<PastMeetUpMetadata, GetPastMeetUpError> {
+        sqlx::query("SELECT id, title, date FROM past_meet_ups WHERE id = ?")
+            .bind(id.to_bytes().as_slice())
+            .try_map(|row: SqliteRow| {
+                Ok(PastMeetUpMetadata::new(
+                    Ulid::from_bytes(
+                        row.try_get::<&[u8], _>("id")?
+                            .try_into()
+                            .map_err(|err| Error::Decode(Box::new(err)))?,
+                    ),
+                    row.get("title"),
+                    row.get("date"),
+                ))
+            })
+            .fetch_one(&self.sqlite_pool)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => GetPastMeetUpError::NotFound(id),
+                _ => GetPastMeetUpError::Unknown(anyhow!("SQLX Error: {err}")),
+            })
+    }
 }
 
 impl FutureMeetUpGateway for SqliteDatabaseGateway {
     async fn get_future_meet_up(&self) -> Result<Option<FutureMeetUp>, GetFutureMeetUpError> {
-        let result = sqlx::query("SELECT * FROM future_meet_ups WHERE id = ?")
+        let result = sqlx::query("SELECT * FROM future_meet_ups")
             .try_map(|row: SqliteRow| {
                 let state = match row.get::<i32, _>("state") {
                     0 => FutureMeetUpState::CallForPapers,
@@ -99,5 +119,25 @@ impl FutureMeetUpGateway for SqliteDatabaseGateway {
             Err(Error::RowNotFound) => Ok(None),
             Err(err) => Err(GetFutureMeetUpError::Unknown(anyhow!("SQLX Error: {err}"))),
         }
+    }
+
+    async fn new_future_meet_up(&self, id: Ulid, location: String, date: NaiveDate) -> std::result::Result<FutureMeetUp, NewFutureMeetUpError> {
+        sqlx::query(
+            "INSERT INTO future_meet_ups (id, state, location, date) VALUES (?, ?, ?, ?)",
+        ).bind(id.to_bytes().as_slice())
+            .bind(0)
+            .bind(&location)
+            .bind(&date)
+            .execute(&self.sqlite_pool)
+            .await
+            .map_err(|err| NewFutureMeetUpError::Unknown(anyhow!("SQLX Error: {err}")))?;
+        Ok(
+            FutureMeetUp::new(
+                id,
+                FutureMeetUpState::CallForPapers,
+                location,
+                date,
+            )
+        )
     }
 }
