@@ -1,4 +1,6 @@
 mod app;
+mod controllers;
+mod extractors;
 
 use crate::app::build_app;
 use anyhow::Result;

@@ -85,7 +85,7 @@ impl GithubGateway for GithubRestGateway {
             .header(USER_AGENT, "RustCWB/0.1.0")
             .form(&[
                 ("client_id", self.client_id.as_str()),
-                ("client_secret", &self.client_secret.as_str()),
+                ("client_secret", self.client_secret.as_str()),
                 ("grant_type", "refresh_token"),
                 ("refresh_token", refresh_token.token()),
             ])
@@ -111,7 +111,6 @@ impl GithubGateway for GithubRestGateway {
         &self,
         code: &str,
     ) -> Result<(AccessToken, AccessToken), ExchangeCodeError> {
-        dbg!(code);
         let response = self
             .client
             .post("https://github.com/login/oauth/access_token")
@@ -119,7 +118,7 @@ impl GithubGateway for GithubRestGateway {
             .header(USER_AGENT, "RustCWB/0.1.0")
             .form(&[
                 ("client_id", self.client_id.as_str()),
-                ("client_secret", &self.client_secret.as_str()),
+                ("client_secret", self.client_secret.as_str()),
                 ("code", code),
             ])
             .send()

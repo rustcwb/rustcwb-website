@@ -44,7 +44,15 @@
                     <ul class="flex space-x-6">
                         <li><a href="/meet_ups">Meet Ups</a></li>
                         {% if user %}
-                        <li>{{ user.nickname }}</li>
+                        <li>
+                            <a
+                                class="font-bold cursor-pointer"
+                                hx-get="/user"
+                                hx-target="#main-content"
+                                hx-push-url="true"
+                                >{{ user.nickname }}</a
+                            >
+                        </li>
                         {% else %}
                         <li>
                             <a

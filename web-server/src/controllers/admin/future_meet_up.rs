@@ -1,0 +1,36 @@
+use std::sync::Arc;
+
+use axum::{extract::State, response::Html, Form};
+use chrono::NaiveDate;
+use domain::create_new_future_meet_up;
+use minijinja::context;
+use serde::Deserialize;
+
+use crate::{
+    app::AppState,
+    controllers::{admin::FutureMeetUpPresenter, HtmlError},
+    extractors::AdminUser,
+};
+
+pub async fn create_future_meet_up(
+    _: AdminUser,
+    State(state): State<Arc<AppState>>,
+    Form(params): Form<CreateFutureMeetUpParam>,
+) -> Result<Html<String>, HtmlError> {
+    let tmpl = state
+        .get_minijinja_env()
+        .get_template("components/admin/future_meet_up/future_meet_up")?;
+    let meet_up =
+        create_new_future_meet_up(&state.database_gateway, params.location, params.date).await?;
+
+    let context = context! {
+        future_meet_up => FutureMeetUpPresenter::from(meet_up),
+    };
+    Ok(Html(tmpl.render(context)?))
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateFutureMeetUpParam {
+    location: String,
+    date: NaiveDate,
+}

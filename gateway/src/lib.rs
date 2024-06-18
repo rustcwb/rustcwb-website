@@ -140,7 +140,7 @@ impl FutureMeetUpGateway for SqliteDatabaseGateway {
             .bind(id.to_bytes().as_slice())
             .bind(0)
             .bind(&location)
-            .bind(&date)
+            .bind(date)
             .execute(&self.sqlite_pool)
             .await
             .map_err(|err| NewFutureMeetUpError::Unknown(anyhow!("SQLX Error: {err}")))?;
@@ -217,7 +217,7 @@ impl UserGateway for SqliteDatabaseGateway {
             .await
             .map_err(|err| StoreUserError::Unknown(anyhow!("SQLX Error: {err}")))?;
         sqlx::query("INSERT INTO users (id, nickname, email, access_token, expires_at, login_method) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET nickname = EXCLUDED.nickname, email = EXCLUDED.email, access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, login_method = EXCLUDED.login_method")
-            .bind(&user_id)
+            .bind(user_id)
             .bind(&user.nickname)
             .bind(&user.email)
             .bind(user.access_token.token())
@@ -233,7 +233,7 @@ impl UserGateway for SqliteDatabaseGateway {
             } => {
                 sqlx::query("INSERT INTO github_logins (id, user_id, access_token, expires_at, refresh_token, refresh_token_expires_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, refresh_token = EXCLUDED.refresh_token, refresh_token_expires_at = EXCLUDED.refresh_token_expires_at")
                     .bind(Ulid::new().to_bytes().as_slice())
-                    .bind(&user_id)
+                    .bind(user_id)
                     .bind(access_token.token())
                     .bind(access_token.expire_at())
                     .bind(refresh_token.token())
@@ -269,7 +269,6 @@ impl UserGateway for SqliteDatabaseGateway {
         )
         .bind(email)
         .try_map(|row: SqliteRow| {
-            dbg!(row.columns());
             Ok(User::new(
                 Ulid::from_bytes(
                     row.try_get::<&[u8], _>("user_id")?
