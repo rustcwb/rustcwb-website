@@ -1,0 +1,7 @@
+{% if future_meet_up %} {% if future_meet_up.state == "CallForPapers" %} {%
+include 'components/future_meet_ups/call_for_papers' %} {% endif %} {% else %}
+<p class="text-md py-2">
+    Ainda não temos um próximo meetup agendado. Fique ligado que avisaremos aqui
+    quando tivermos.
+</p>
+{% endif %}

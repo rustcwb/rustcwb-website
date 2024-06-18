@@ -88,6 +88,14 @@ impl AppState {
             env,
             "templates/components/admin/future_meet_up/call_for_papers.html"
         );
+        add_template!(
+            env,
+            "templates/components/future_meet_ups/future_meet_up.html"
+        );
+        add_template!(
+            env,
+            "templates/components/future_meet_ups/call_for_papers.html"
+        );
 
         Ok(Self {
             admin_details,

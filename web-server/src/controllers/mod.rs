@@ -1,6 +1,8 @@
 use axum::response::{Html, IntoResponse};
-use domain::User;
+use chrono::NaiveDate;
+use domain::{FutureMeetUp, FutureMeetUpState, User};
 use serde::{Deserialize, Serialize};
+use ulid::Ulid;
 
 pub mod admin;
 pub mod index;
@@ -71,6 +73,47 @@ impl From<User> for UserPresenter {
     fn from(user: User) -> Self {
         Self {
             nickname: user.nickname.chars().take(10).collect::<String>(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct FutureMeetUpPresenter {
+    id: Ulid,
+    title: String,
+    state: String,
+    description: String,
+    speaker: String,
+    date: NaiveDate,
+    location: String,
+}
+
+impl From<FutureMeetUp> for FutureMeetUpPresenter {
+    fn from(meetup: FutureMeetUp) -> Self {
+        let (state, title, description, speaker) = match meetup.state {
+            FutureMeetUpState::Scheduled {
+                title,
+                description,
+                speaker,
+            } => ("Scheduled".into(), title, description, speaker),
+            FutureMeetUpState::CallForPapers => (
+                "CallForPapers".into(),
+                String::new(),
+                String::new(),
+                String::new(),
+            ),
+            FutureMeetUpState::Voting => {
+                ("Voting".into(), String::new(), String::new(), String::new())
+            }
+        };
+        Self {
+            id: meetup.id,
+            title,
+            state,
+            description,
+            speaker,
+            date: meetup.date,
+            location: meetup.location,
         }
     }
 }
