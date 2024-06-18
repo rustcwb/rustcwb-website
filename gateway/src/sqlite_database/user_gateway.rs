@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use crate::error_and_log;
 use domain::{AccessToken, GetUserError, LoginMethod, StoreUserError, User, UserGateway};
 use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
@@ -53,7 +53,7 @@ impl UserGateway for SqliteDatabaseGateway {
         .await
         .map_err(|err| match err {
             Error::RowNotFound => GetUserError::NotFound,
-            _ => GetUserError::Unknown(anyhow!("SQLX Error: {err}")),
+            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
         })
     }
 
@@ -67,7 +67,7 @@ impl UserGateway for SqliteDatabaseGateway {
             .sqlite_pool
             .begin()
             .await
-            .map_err(|err| StoreUserError::Unknown(anyhow!("SQLX Error: {err}")))?;
+            .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
         sqlx::query("INSERT INTO users (id, nickname, email, access_token, expires_at, login_method) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET nickname = EXCLUDED.nickname, email = EXCLUDED.email, access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, login_method = EXCLUDED.login_method")
             .bind(user_id)
             .bind(&user.nickname)
@@ -77,7 +77,7 @@ impl UserGateway for SqliteDatabaseGateway {
             .bind(login_method)
             .execute(&mut *transaction)
             .await
-            .map_err(|err| StoreUserError::Unknown(anyhow!("SQLX Error: {err}")))?;
+            .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
         match &user.login_method {
             LoginMethod::Github {
                 access_token,
@@ -92,13 +92,13 @@ impl UserGateway for SqliteDatabaseGateway {
                     .bind(refresh_token.expire_at())
                     .execute(&mut *transaction)
                     .await
-                    .map_err(|err| StoreUserError::Unknown(anyhow!("SQLX Error: {err}")))?;
+                    .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
             }
         };
         transaction
             .commit()
             .await
-            .map_err(|err| StoreUserError::Unknown(anyhow!("SQLX Error: {err}")))?;
+            .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
         Ok(user)
     }
 
@@ -149,7 +149,7 @@ impl UserGateway for SqliteDatabaseGateway {
         .await
         .map_err(|err| match err {
             Error::RowNotFound => GetUserError::NotFound,
-            _ => GetUserError::Unknown(anyhow!("SQLX Error: {err}")),
+            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
         })
     }
 }

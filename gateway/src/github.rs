@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use crate::error_and_log;
 use chrono::Utc;
 use domain::{
     AccessToken, ExchangeCodeError, GithubGateway, RefreshTokenError, UserInfoGithubError,
@@ -20,21 +20,6 @@ impl GithubRestGateway {
             client_secret,
         }
     }
-}
-
-macro_rules! error_and_log {
-    ($msg:literal) => {
-        {
-            tracing::error!($msg);
-            anyhow!($msg)
-        }
-    };
-    ($fmt:expr, $($arg:tt)*) => {
-        {
-            tracing::error!($fmt, $($arg)*);
-            anyhow!($fmt, $($arg)*)
-        }
-    };
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -91,10 +76,12 @@ impl GithubGateway for GithubRestGateway {
             ])
             .send()
             .await
-            .map_err(|err| RefreshTokenError::Unknown(anyhow!("Reqwest error {err}")))?
+            .map_err(|err| RefreshTokenError::Unknown(error_and_log!("Reqwest error {err}")))?
             .json::<AccessTokenResponse>()
             .await
-            .map_err(|err| RefreshTokenError::Unknown(anyhow!("Invalid json response {err}")))?;
+            .map_err(|err| {
+                RefreshTokenError::Unknown(error_and_log!("Invalid json response {err}"))
+            })?;
         Ok((
             AccessToken::new(
                 response.access_token,

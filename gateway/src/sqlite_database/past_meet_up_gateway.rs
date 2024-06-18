@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use crate::error_and_log;
 use domain::{
     GetPastMeetUpError, ListPastMeetUpsError, PastMeetUp, PastMeetUpGateway, PastMeetUpMetadata,
 };
@@ -25,7 +25,7 @@ impl PastMeetUpGateway for SqliteDatabaseGateway {
                 })
                 .fetch_all(&self.sqlite_pool)
                 .await
-                .map_err(|err| anyhow!("SQLX Error: {err}"))?,
+                .map_err(|err| error_and_log!("SQLX Error: {err}"))?,
         )
     }
 
@@ -50,7 +50,7 @@ impl PastMeetUpGateway for SqliteDatabaseGateway {
             .await
             .map_err(|err| match err {
                 Error::RowNotFound => GetPastMeetUpError::NotFound(id),
-                _ => GetPastMeetUpError::Unknown(anyhow!("SQLX Error: {err}")),
+                _ => GetPastMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")),
             })
     }
 
@@ -75,7 +75,7 @@ impl PastMeetUpGateway for SqliteDatabaseGateway {
             .await
             .map_err(|err| match err {
                 Error::RowNotFound => GetPastMeetUpError::NotFound(id),
-                _ => GetPastMeetUpError::Unknown(anyhow!("SQLX Error: {err}")),
+                _ => GetPastMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")),
             })
     }
 }

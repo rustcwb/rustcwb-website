@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use crate::error_and_log;
 use chrono::NaiveDate;
 use domain::{
     FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError,
@@ -39,7 +39,9 @@ impl FutureMeetUpGateway for SqliteDatabaseGateway {
         match result {
             Ok(future_meet_up) => Ok(Some(future_meet_up)),
             Err(Error::RowNotFound) => Ok(None),
-            Err(err) => Err(GetFutureMeetUpError::Unknown(anyhow!("SQLX Error: {err}"))),
+            Err(err) => Err(GetFutureMeetUpError::Unknown(error_and_log!(
+                "SQLX Error: {err}"
+            ))),
         }
     }
 
@@ -56,7 +58,7 @@ impl FutureMeetUpGateway for SqliteDatabaseGateway {
             .bind(date)
             .execute(&self.sqlite_pool)
             .await
-            .map_err(|err| NewFutureMeetUpError::Unknown(anyhow!("SQLX Error: {err}")))?;
+            .map_err(|err| NewFutureMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?;
         Ok(FutureMeetUp::new(
             id,
             FutureMeetUpState::CallForPapers,
