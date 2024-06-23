@@ -2,8 +2,10 @@ use anyhow::Result;
 use sqlx::SqlitePool;
 
 mod future_meet_up_gateway;
+mod paper_gateway;
 mod past_meet_up_gateway;
 mod user_gateway;
+mod vote_gateway;
 
 pub struct SqliteDatabaseGateway {
     sqlite_pool: SqlitePool,

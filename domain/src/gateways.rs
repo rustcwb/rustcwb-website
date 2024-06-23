@@ -4,7 +4,7 @@ use chrono::NaiveDate;
 use thiserror::Error;
 use ulid::Ulid;
 
-use crate::{AccessToken, FutureMeetUp, PastMeetUp, PastMeetUpMetadata, User};
+use crate::{AccessToken, FutureMeetUp, Paper, PastMeetUp, PastMeetUpMetadata, User, Vote};
 
 pub trait PastMeetUpGateway {
     async fn list_past_meet_ups(&self) -> Result<Vec<PastMeetUpMetadata>, ListPastMeetUpsError>;
@@ -37,6 +37,20 @@ pub trait FutureMeetUpGateway {
         location: String,
         date: NaiveDate,
     ) -> Result<FutureMeetUp, NewFutureMeetUpError>;
+    async fn update_future_meet_up_to_voting(
+        &self,
+        id: &Ulid,
+    ) -> Result<FutureMeetUp, UpdateFutureMeetUpError>;
+}
+
+#[derive(Debug, Error)]
+pub enum UpdateFutureMeetUpError {
+    #[error("Invalid meet up state")]
+    InvalidState,
+    #[error("Future meet up with not found")]
+    NotFound,
+    #[error("Unknown error: `{0}`")]
+    Unknown(#[from] anyhow::Error),
 }
 
 #[derive(Debug, Error)]
@@ -100,6 +114,54 @@ pub enum RefreshTokenError {
 
 #[derive(Debug, Error)]
 pub enum ExchangeCodeError {
+    #[error("Unknown error: `{0}`")]
+    Unknown(#[from] anyhow::Error),
+}
+
+pub trait PaperGateway {
+    async fn store_paper_with_meet_up(
+        &self,
+        paper: Paper,
+        meet_up_id: Ulid,
+        limit: u8,
+    ) -> Result<(), StorePaperError>;
+    async fn get_paper(&self, id: &Ulid) -> Result<Paper, GetPaperError>;
+    async fn get_papers_from_user_and_meet_up(
+        &self,
+        user_id: &Ulid,
+        meet_up_id: &Ulid,
+    ) -> Result<Vec<Paper>, GetPaperError>;
+    async fn get_papers_from_meet_up(&self, meet_up_id: &Ulid)
+        -> Result<Vec<Paper>, GetPaperError>;
+}
+
+#[derive(Debug, Error)]
+pub enum StorePaperError {
+    #[error("More than limit papaers per user per meetups. Limit is `{0}`")]
+    MoreThanLimitPapersPerUserPerMeetUp(u8),
+    #[error("Unknown error: `{0}`")]
+    Unknown(#[from] anyhow::Error),
+}
+
+#[derive(Debug, Error)]
+pub enum GetPaperError {
+    #[error("Paper not found with id `{0}`")]
+    NotFound(Ulid),
+    #[error("Unknown error: `{0}`")]
+    Unknown(#[from] anyhow::Error),
+}
+
+pub trait VoteGateway {
+    async fn store_votes(&self, votes: Vec<Vote>) -> Result<(), VoteError>;
+    async fn get_votes_for_user(
+        &self,
+        meet_up_id: &Ulid,
+        user_id: &Ulid,
+    ) -> Result<Vec<Vote>, VoteError>;
+}
+
+#[derive(Debug, Error)]
+pub enum VoteError {
     #[error("Unknown error: `{0}`")]
     Unknown(#[from] anyhow::Error),
 }

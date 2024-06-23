@@ -1,11 +1,9 @@
-{% if future_meet_up %}
-{% if future_meet_up.state == "CallForPapers" %}
-{% include 'components/admin/future_meet_up/call_for_papers' %}
-<!--{% elif future_meet_up.state == "Scheduled" %}-->
-<!--{% include 'components/admin/future_meet_up/scheduled' %}-->
-<!--{% elif future_meet_up.state == "Finished" %}-->
-<!--{% include 'components/admin/future_meet_up/finished' %}-->
-<!--{% endif %}-->
-{% else %}
-{% include 'components/admin/future_meet_up/no_future_meet_up' %}
-{% endif %}
+{% if future_meet_up %} {% if future_meet_up.state == "CallForPapers" %} {%
+include 'components/admin/future_meet_up/call_for_papers' %} {% elif
+future_meet_up.state == "Voting" %} {% include
+'components/admin/future_meet_up/voting' %}
+<!--{% elif future_meet_up.state == "Finished" %} -->
+<!--{% include 'components/admin/future_meet_up/finished' %} -->
+<!--{% endif %} -->
+{% else %} {% include 'components/admin/future_meet_up/no_future_meet_up' %} {%
+endif %}

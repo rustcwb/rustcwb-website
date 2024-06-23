@@ -5,9 +5,12 @@ use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
 pub mod admin;
+pub mod call_for_papers;
 pub mod index;
 pub mod past_meet_up;
+pub mod preview_markdown;
 pub mod user;
+pub mod voting;
 
 pub struct HtmlError;
 
@@ -67,12 +70,14 @@ where
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct UserPresenter {
     nickname: String,
+    email: String,
 }
 
 impl From<User> for UserPresenter {
     fn from(user: User) -> Self {
         Self {
             nickname: user.nickname.chars().take(10).collect::<String>(),
+            email: user.email,
         }
     }
 }

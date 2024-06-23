@@ -24,7 +24,7 @@
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
             rel="stylesheet"
         />
-        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+        <script src="https://unpkg.com/htmx.org@2.0.0"></script>
     </head>
 
     <body class="flex flex-col h-screen bg-zinc-50 text-md font-jetBrains">
@@ -41,8 +41,7 @@
                     <span class="hidden md:contents"
                         >The Rust Lang Meet Up Group of Curitiba</span
                     >
-                    <ul class="flex space-x-6">
-                        <li><a href="/meet_ups">Meet Ups</a></li>
+                    <ul class="flex">
                         {% if user %}
                         <li>
                             <a

@@ -1,0 +1,104 @@
+{% extends "base" %} {% block content %}
+<div class="flex flex-col items-left justify-items-start my-3 text-lg">
+    {% if errors %}
+    <section class="flex flex-col p-4 items-center text-md">
+        <div
+            class="flex flex-col items-left justify-items-start space-y-3 data-width"
+        >
+            {% for error in errors %}
+            <div class="bg-red-500 text-white rounded-lg p-2">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %} {% if papers %}
+    <section class="flex flex-col p-4 items-center">
+        <div class="flex flex-col data-width">
+            <h2 class="text-2xl font-bold">
+                Propostas Já Submetidas por {{ user.nickname }}
+            </h2>
+            {% for paper in papers %}
+            <span class="mt-2 bg-rustLight p-3 rounded-md">
+                {{ paper.title }}
+            </span>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %} {% if is_papers_limit %}
+    <section class="flex flex-col p-4 items-center">
+        <div class="flex flex-col data-width">
+            Limite de submissões atingido. Aguarde a próxima chamada.
+        </div>
+    </section>
+    {% else %}
+    <section class="flex flex-col p-4 items-center">
+        <div class="flex flex-col data-width">
+            <h2 class="text-2xl font-bold">Call for Papers</h2>
+            <p class="py-2 text-justify">
+                O RustCWB está sempre em busca de novos palestrantes para nossos
+                meetups. Se você tem algo interessante para falar sobre Rust,
+                não hesite em submeter sua proposta.
+            </p>
+            <p class="py-2 text-justify">
+                Para submeter sua proposta, basta preencher o formulário abaixo.
+                Caso sua proposta seja aceita, entraremos em contato para
+                agendar sua palestra.
+            </p>
+            <p class="py-2 text-justify">
+                Nossa próxima palestra está agendada para o dia
+                <bold class="font-bold">{{ future_meet_up.date }}</bold>.
+            </p>
+            <form
+                hx-post="/callForPapers"
+                hx-target="#main-content"
+                class="flex flex-col"
+            >
+                <label for="name">Nome do Palestrante</label>
+                <input
+                    type="text"
+                    name="speaker"
+                    id="name"
+                    class="p-2 rounded-md border border-gray-300"
+                    required
+                />
+                <label for="email"
+                    >E-mail do Palestrante (Vamos usar este email pra entrar em
+                    contato)</label
+                >
+                <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    class="p-2 rounded-md border border-gray-300"
+                    value="{{ user.email }}"
+                    required
+                />
+                <label for="title">Título da Palestra</label>
+                <input
+                    type="text"
+                    name="title"
+                    id="title"
+                    class="p-2 rounded-md border border-gray-300"
+                    required
+                />
+                <label for="description">Descrição da Palestra</label>
+                <textarea
+                    name="description"
+                    id="description"
+                    class="p-4 rounded-md border border-gray-300"
+                    rows="8"
+                    maxlength="200"
+                    minlength="20"
+                    required
+                ></textarea>
+                <button
+                    type="submit"
+                    class="mt-4 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+                >
+                    Submeter
+                </button>
+            </form>
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

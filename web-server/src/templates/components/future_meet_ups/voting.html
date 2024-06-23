@@ -1,0 +1,27 @@
+<div>
+    Data:
+    <time datetime="{{ future_meet_up.date }}">{{ future_meet_up.date }}</time>
+</div>
+<div>
+    Local:
+    <address class="inline">{{ future_meet_up.location }}</address>
+</div>
+
+<p>Estamos votando qual será o próximo meetup. Sinta-se a vontade para votar</p>
+<div class="flex justify-center m-2">
+    {% if user %}
+    <a
+        class="mt-2 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+        hx-get="/voting"
+        hx-push-url="true"
+        hx-target="#main-content"
+        >Votar</a
+    >
+    {% else %}
+    <a
+        class="mt-2 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+        href="https://github.com/login/oauth/authorize?client_id={{ client_id }}"
+        >Login para Votar</a
+    >
+    {% endif %}
+</div>

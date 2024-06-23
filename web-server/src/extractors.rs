@@ -9,6 +9,7 @@ use axum::{
         request::Parts,
         HeaderMap, HeaderName, StatusCode,
     },
+    response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::extract::CookieJar;
 use base64::{prelude::BASE64_STANDARD, Engine};
@@ -81,6 +82,26 @@ impl FromRequestParts<Arc<AppState>> for MaybeUser {
             }
             None => Ok(MaybeUser(None)),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct LoggedUser(pub User);
+
+#[async_trait]
+impl FromRequestParts<Arc<AppState>> for LoggedUser {
+    type Rejection = Response;
+
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Arc<AppState>,
+    ) -> Result<Self, Self::Rejection> {
+        let user = MaybeUser::from_request_parts(parts, state)
+            .await
+            .map_err(|_| Redirect::to("/user").into_response())?
+            .0
+            .ok_or(Redirect::to("/user").into_response())?;
+        Ok(Self(user))
     }
 }
 

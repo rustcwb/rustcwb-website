@@ -31,7 +31,7 @@ pub struct FutureMeetUp {
     pub date: NaiveDate,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum FutureMeetUpState {
     CallForPapers,
     Voting,
@@ -40,6 +40,16 @@ pub enum FutureMeetUpState {
         description: String,
         speaker: String,
     },
+}
+
+impl std::fmt::Display for FutureMeetUpState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FutureMeetUpState::CallForPapers => write!(f, "CallForPapers"),
+            FutureMeetUpState::Voting => write!(f, "Voting"),
+            FutureMeetUpState::Scheduled { .. } => write!(f, "Scheduled"),
+        }
+    }
 }
 
 impl FutureMeetUp {
@@ -154,4 +164,22 @@ pub enum LoginMethod {
         access_token: AccessToken,
         refresh_token: AccessToken,
     },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Paper {
+    pub id: Ulid,
+    pub email: String,
+    pub user_id: Ulid,
+    pub title: String,
+    pub description: String,
+    pub speaker: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Vote {
+    pub paper_id: Ulid,
+    pub meet_up_id: Ulid,
+    pub user_id: Ulid,
+    pub vote: u32,
 }

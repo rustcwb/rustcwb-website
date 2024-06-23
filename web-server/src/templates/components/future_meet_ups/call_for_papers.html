@@ -12,9 +12,19 @@
     vontade para submeter alguma proposta.
 </p>
 <div class="flex justify-center m-2">
+    {% if user %}
     <a
         class="px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
-        hx-get="/callForPapers/{{ future_meet_up.id }}"
+        hx-get="/callForPapers"
+        hx-push-url="true"
+        hx-target="#main-content"
         >Submeter Proposta</a
     >
+    {% else %}
+    <a
+        class="px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+        href="https://github.com/login/oauth/authorize?client_id={{ client_id }}"
+        >Login para submeter uma proposta</a
+    >
+    {% endif %}
 </div>

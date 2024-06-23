@@ -2,7 +2,7 @@ use crate::error_and_log;
 use chrono::NaiveDate;
 use domain::{
     FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetFutureMeetUpError,
-    NewFutureMeetUpError,
+    NewFutureMeetUpError, UpdateFutureMeetUpError,
 };
 use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
@@ -65,5 +65,30 @@ impl FutureMeetUpGateway for SqliteDatabaseGateway {
             location,
             date,
         ))
+    }
+
+    async fn update_future_meet_up_to_voting(
+        &self,
+        id: &Ulid,
+    ) -> Result<FutureMeetUp, UpdateFutureMeetUpError> {
+        let rows_affected =
+            sqlx::query("UPDATE future_meet_ups SET state = 1 WHERE id = ? AND state = 0")
+                .bind(id.to_bytes().as_slice())
+                .execute(&self.sqlite_pool)
+                .await
+                .map_err(|err| {
+                    UpdateFutureMeetUpError::Unknown(error_and_log!("SQLX Error: {err}"))
+                })?
+                .rows_affected();
+        let future_meet_up = self
+            .get_future_meet_up()
+            .await
+            .map_err(|err| error_and_log!("{err}"))?
+            .ok_or(UpdateFutureMeetUpError::NotFound)?;
+        if rows_affected == 0 {
+            return Err(UpdateFutureMeetUpError::InvalidState);
+        }
+
+        Ok(future_meet_up)
     }
 }

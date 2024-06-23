@@ -1,7 +1,31 @@
 {% if future_meet_up %} {% if future_meet_up.state == "CallForPapers" %} {%
-include 'components/future_meet_ups/call_for_papers' %} {% endif %} {% else %}
+include 'components/future_meet_ups/call_for_papers' %} {% endif %} {% if
+future_meet_up.state == "Voting" %} {% include
+'components/future_meet_ups/voting' %} {% endif %} {% else %}
 <p class="text-md py-2">
     Ainda não temos um próximo meetup agendado. Fique ligado que avisaremos aqui
     quando tivermos.
 </p>
 {% endif %}
+
+<!-- <header>
+    <h3 class="font-bold text-xl">
+        Threads vs Green Threads vs Gorotines vs Tokio Tasks
+    </h3>
+</header>
+<div>
+    Data:
+    <time datetime="2024-07-14">2024-07-14</time>
+</div>
+<p>Speaker: Bruno Clemente</p>
+<address>
+    Local: Auditório Lateral, Rua da Paz, 123, Curitiba, PR
+</address>
+<p class="text-md py-2">
+    Para se inscrever
+    <a
+        class="underline transition ease-in-out duration-150 hover:text-rust"
+        href="#"
+        >click aqui</a
+    >. É gratuito.
+</p> -->

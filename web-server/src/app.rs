@@ -2,7 +2,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::Router;
 use gateway::github::GithubRestGateway;
 use minijinja::Environment;
@@ -11,9 +11,12 @@ use tower_http::services::ServeDir;
 use gateway::SqliteDatabaseGateway;
 
 use crate::controllers::admin::admin_router;
+use crate::controllers::call_for_papers::{call_for_papers, save_call_for_papers};
 use crate::controllers::index::index;
 use crate::controllers::past_meet_up::{past_meet_up, past_meet_up_metadata};
+use crate::controllers::preview_markdown::preview_markdown;
 use crate::controllers::user::{github_login, logout, user};
+use crate::controllers::voting::{store_vote, voting};
 
 pub async fn build_app<T: Clone + Send + Sync + 'static>(
     assets_dir: impl AsRef<Path>,
@@ -24,6 +27,11 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
     Ok(Router::new()
         .route("/", get(index))
         .nest("/admin", admin_router())
+        .route("/previewMarkdown", post(preview_markdown))
+        .route("/callForPapers", get(call_for_papers))
+        .route("/callForPapers", post(save_call_for_papers))
+        .route("/voting", get(voting))
+        .route("/storeVote", post(store_vote))
         .route("/pastMeetUp/:id", get(past_meet_up))
         .route("/pastMeetUp/metadata/:id", get(past_meet_up_metadata))
         .route("/user", get(user))
@@ -70,6 +78,9 @@ impl AppState {
         add_template!(env, "templates/home.html");
         add_template!(env, "templates/admin.html");
         add_template!(env, "templates/user.html");
+        add_template!(env, "templates/call_for_papers.html");
+        add_template!(env, "templates/voting.html");
+        add_template!(env, "templates/success.html");
         add_template!(env, "templates/components/past_meet_ups/past_meet_ups.html");
         add_template!(
             env,
@@ -88,6 +99,7 @@ impl AppState {
             env,
             "templates/components/admin/future_meet_up/call_for_papers.html"
         );
+        add_template!(env, "templates/components/admin/future_meet_up/voting.html");
         add_template!(
             env,
             "templates/components/future_meet_ups/future_meet_up.html"
@@ -96,7 +108,7 @@ impl AppState {
             env,
             "templates/components/future_meet_ups/call_for_papers.html"
         );
-
+        add_template!(env, "templates/components/future_meet_ups/voting.html");
         Ok(Self {
             admin_details,
             github_gateway,
