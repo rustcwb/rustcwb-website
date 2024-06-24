@@ -2,12 +2,12 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
-use axum::routing::{get, post};
 use axum::Router;
-use gateway::github::GithubRestGateway;
+use axum::routing::{get, post};
 use minijinja::Environment;
 use tower_http::services::ServeDir;
 
+use gateway::github::GithubRestGateway;
 use gateway::SqliteDatabaseGateway;
 
 use crate::controllers::admin::admin_router;
@@ -16,7 +16,7 @@ use crate::controllers::index::index;
 use crate::controllers::past_meet_up::{past_meet_up, past_meet_up_metadata};
 use crate::controllers::preview_markdown::preview_markdown;
 use crate::controllers::user::{github_login, logout, user};
-use crate::controllers::voting::{store_vote, voting};
+use crate::controllers::voting::{paper_details, paper_no_details, store_vote, voting};
 
 pub async fn build_app<T: Clone + Send + Sync + 'static>(
     assets_dir: impl AsRef<Path>,
@@ -31,6 +31,8 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
         .route("/callForPapers", get(call_for_papers))
         .route("/callForPapers", post(save_call_for_papers))
         .route("/voting", get(voting))
+        .route("/voting/paperDetails/:id", get(paper_details))
+        .route("/voting/paperNoDetails/:id", get(paper_no_details))
         .route("/storeVote", post(store_vote))
         .route("/pastMeetUp/:id", get(past_meet_up))
         .route("/pastMeetUp/metadata/:id", get(past_meet_up_metadata))
@@ -81,6 +83,8 @@ impl AppState {
         add_template!(env, "templates/call_for_papers.html");
         add_template!(env, "templates/voting.html");
         add_template!(env, "templates/success.html");
+        add_template!(env, "templates/components/vote_paper/paper.html");
+        add_template!(env, "templates/components/vote_paper/paper_details.html");
         add_template!(env, "templates/components/past_meet_ups/past_meet_ups.html");
         add_template!(
             env,

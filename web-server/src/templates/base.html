@@ -1,74 +1,74 @@
 <!doctype html>
 <html lang="pt">
-    <head>
-        <title>{% block title %}RustCWB{% endblock %}</title>
-        <meta charset="UTF-8" />
-        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-        <link href="/assets/css/styles.css" rel="stylesheet" type="text/css" />
-        <link href="https://fonts.googleapis.com" rel="preconnect" />
-        <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
-        <link
+<head>
+    <title>{% block title %}RustCWB{% endblock %}</title>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="/assets/css/styles.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link
             href="/assets/favicon-16x16.png"
             rel="icon"
             sizes="16x16"
             type="image/png"
-        />
-        <link
+    />
+    <link
             href="/assets/favicon-32x32.png"
             rel="icon"
             sizes="32x32"
             type="image/png"
-        />
-        <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml" />
-        <link
+    />
+    <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+    <link
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
             rel="stylesheet"
-        />
-        <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-    </head>
+    />
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+</head>
 
-    <body class="flex flex-col h-screen bg-zinc-50 text-md font-jetBrains">
-        <header>
-            <nav class="bg-black text-white text-lg">
-                <div class="flex justify-between items-center p-4">
+<body class="flex flex-col h-screen bg-zinc-50 text-md font-jetBrains">
+<header>
+    <nav class="bg-black text-white text-lg">
+        <div class="flex justify-between items-center p-4">
+            <a
+                    class="font-bold cursor-pointer"
+                    hx-get="/"
+                    hx-push-url="true"
+                    hx-target="#main-content"
+            >RustCWB 🦀</a
+            >
+            <span class="hidden md:contents"
+            >The Rust Lang Meet Up Group of Curitiba</span
+            >
+            <ul class="flex">
+                {% if user %}
+                <li>
                     <a
-                        class="font-bold cursor-pointer"
-                        hx-get="/"
-                        hx-push-url="true"
-                        hx-target="#main-content"
-                        >RustCWB 🦀</a
+                            class="font-bold cursor-pointer"
+                            hx-get="/user"
+                            hx-push-url="true"
+                            hx-target="#main-content"
+                    >{{ user.nickname }}</a
                     >
-                    <span class="hidden md:contents"
-                        >The Rust Lang Meet Up Group of Curitiba</span
+                </li>
+                {% else %}
+                <li>
+                    <a
+                            href="https://github.com/login/oauth/authorize?client_id={{ client_id }}"
+                    >Login</a
                     >
-                    <ul class="flex">
-                        {% if user %}
-                        <li>
-                            <a
-                                class="font-bold cursor-pointer"
-                                hx-get="/user"
-                                hx-target="#main-content"
-                                hx-push-url="true"
-                                >{{ user.nickname }}</a
-                            >
-                        </li>
-                        {% else %}
-                        <li>
-                            <a
-                                href="https://github.com/login/oauth/authorize?client_id={{ client_id }}"
-                                >Login</a
-                            >
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </nav>
-        </header>
-        <main class="flex flex-col mb-auto" id="main-content">
-            {% block content %}{% endblock %}
-        </main>
-        <footer class="bg-black text-white">
-            <p class="text-center text-lg p-4">RustCWB - 2024</p>
-        </footer>
-    </body>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+</header>
+<main class="flex flex-col mb-auto" id="main-content">
+    {% block content %}{% endblock %}
+</main>
+<footer class="bg-black text-white">
+    <p class="text-center text-lg p-4">RustCWB - 2024</p>
+</footer>
+</body>
 </html>

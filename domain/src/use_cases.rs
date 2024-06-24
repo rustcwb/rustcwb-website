@@ -1,16 +1,13 @@
+use std::collections::HashMap;
+
 use anyhow::{anyhow, bail};
 use chrono::NaiveDate;
 use thiserror::Error;
 use ulid::Ulid;
 
-const MAX_PAPERS_PER_USER_PER_MEET_UP: u8 = 2;
+use crate::{AccessToken, FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, gateways::PastMeetUpGateway, GetFutureMeetUpError, GetPaperError, GetPastMeetUpError, GetUserError, GithubGateway, LoginMethod, NewFutureMeetUpError, Paper, PaperGateway, PastMeetUp, PastMeetUpMetadata, StorePaperError, User, UserGateway, Vote, VoteGateway};
 
-use crate::{
-    gateways::PastMeetUpGateway, AccessToken, FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState,
-    GetFutureMeetUpError, GetPastMeetUpError, GetUserError, GithubGateway, LoginMethod,
-    NewFutureMeetUpError, Paper, PaperGateway, PastMeetUp, PastMeetUpMetadata, StorePaperError,
-    User, UserGateway, VoteGateway,
-};
+const MAX_PAPERS_PER_USER_PER_MEET_UP: u8 = 2;
 
 pub async fn show_home_page(
     past_meet_up_gateway: &impl PastMeetUpGateway,
@@ -238,5 +235,59 @@ pub async fn show_voting(
     let papers = papers_gateway
         .get_papers_from_meet_up(&future_meet_up.id)
         .await?;
+    if votes.is_empty() {
+        vote_gateway.store_votes(
+            papers.iter().enumerate().map(|(vote, paper)| Vote {
+                user_id: user_id.clone(),
+                paper_id: paper.id.clone(),
+                meet_up_id: future_meet_up.id.clone(),
+                vote: vote as u32,
+            }).collect()
+        ).await?;
+        return Ok((future_meet_up, papers));
+    }
+    let mut papers = papers
+        .into_iter()
+        .map(|paper| (paper.id.clone(), paper))
+        .collect::<HashMap<Ulid, Paper>>();
+    let papers = votes
+        .into_iter()
+        .map(|vote| {
+            papers
+                .remove(&vote.paper_id)
+                .ok_or(anyhow!("Vote for invalid paper '{}'", vote.paper_id))
+        })
+        .collect::<anyhow::Result<Vec<Paper>>>()?;
     Ok((future_meet_up, papers))
+}
+
+pub async fn store_votes(
+    future_meet_up_gateway: &impl FutureMeetUpGateway,
+    vote_gateway: &impl VoteGateway,
+    user_id: &Ulid,
+    papers: Vec<Ulid>,
+) -> anyhow::Result<()> {
+    let future_meet_up = future_meet_up_gateway
+        .get_future_meet_up()
+        .await?
+        .ok_or(anyhow!("No meet up found"))?;
+    let votes = papers
+        .into_iter()
+        .enumerate()
+        .map(|(vote, paper_id)| Vote {
+            user_id: user_id.clone(),
+            paper_id,
+            meet_up_id: future_meet_up.id.clone(),
+            vote: vote as u32,
+        })
+        .collect();
+    vote_gateway.store_votes(votes).await?;
+    Ok(())
+}
+
+pub async fn get_paper(
+    paper_gateway: &impl PaperGateway,
+    id: &Ulid,
+) -> Result<Paper, GetPaperError> {
+    paper_gateway.get_paper(id).await
 }

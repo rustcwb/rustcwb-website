@@ -3,7 +3,7 @@
     {% if errors %}
     <section class="flex flex-col p-4 items-center text-md">
         <div
-            class="flex flex-col items-left justify-items-start space-y-3 data-width"
+                class="flex flex-col items-left justify-items-start space-y-3 data-width"
         >
             {% for error in errors %}
             <div class="bg-red-500 text-white rounded-lg p-2">{{ error }}</div>
@@ -20,45 +20,62 @@
                 última de baixo a de menor interesse.
             </p>
         </div>
-        <div class="flex flex-col data-width">
-            <form class="sortable" hx-post="/storeVote" hx-trigger="end">
-                {% for paper in papers %}
-                <div
-                    class="rounded-md mt-2 p-3 bg-rustLight hover:bg-rustDark cursor-move transition ease-in-out duration-150"
-                >
-                    <input
-                        type="hidden"
-                        name="papers[]"
-                        value="{{ paper.id }}"
-                    />
-                    {{ paper.title }}
-                </div>
-                {% endfor %}
-            </form>
+        <div class="flex flex-col data-width mt-2">
+            <ul>
+                <form class="sortable" hx-post="/storeVote" hx-trigger="end">
+                    {% block papers %}
+                    {% for paper in papers %}
+                    <li
+                            class="mt-1"
+                    >
+                        {% include 'components/vote_paper/paper' %}
+                    </li>
+                    {% endfor %}
+                    {% endblock %}
+                </form>
+            </ul>
         </div>
     </section>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
-    htmx.onLoad(function (content) {
-        var sortables = content.querySelectorAll(".sortable");
-        for (var i = 0; i < sortables.length; i++) {
-            var sortable = sortables[i];
-            var sortableInstance = new Sortable(sortable, {
-                animation: 150,
-                ghostClass: "blue-background-class",
+    function loadScript(scriptUrl) {
+        const script = document.createElement('script');
+        script.src = scriptUrl;
+        document.body.appendChild(script);
 
-                // Disable sorting on the `end` event
-                onEnd: function (evt) {
-                    this.option("disabled", true);
-                },
-            });
+        return new Promise((res, rej) => {
+            script.onload = function () {
+                res();
+            }
+            script.onerror = function () {
+                rej();
+            }
+        });
+    }
 
-            // Re-enable sorting on the `htmx:afterSwap` event
-            sortable.addEventListener("htmx:afterSwap", function () {
-                sortableInstance.option("disabled", false);
-            });
-        }
-    });
+    loadScript('https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js')
+        .then(() => {
+            var sortables = document.querySelectorAll(".sortable");
+            for (var i = 0; i < sortables.length; i++) {
+                var sortable = sortables[i];
+                var sortableInstance = new Sortable(sortable, {
+                    animation: 150,
+                    ghostClass: "blue-background-class",
+
+                    // Disable sorting on the `end` event
+                    onEnd: function (evt) {
+                        this.option("disabled", true);
+                    },
+                });
+
+                // Re-enable sorting on the `htmx:afterSwap` event
+                sortable.addEventListener("htmx:afterSwap", function () {
+                    sortableInstance.option("disabled", false);
+                });
+            }
+        })
+        .catch(() => {
+            console.error('Script loading failed! Handle this error');
+        });
 </script>
 {% endblock %}

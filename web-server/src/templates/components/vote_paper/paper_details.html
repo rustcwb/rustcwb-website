@@ -1,0 +1,25 @@
+<div class="" id="paper-details-{{paper.id}}">
+    <input
+            name="papers[]"
+            type="hidden"
+            value="{{ paper.id }}"
+    />
+    <div class="flex flex-row justify-between">
+        <div class="rounded-tl-md w-full p-3 bg-rustLight hover:bg-rustDark cursor-move transition ease-in-out duration-150 font-bold">
+            {{ paper.title }}
+        </div>
+        <div class="rounded-tr-md border-l-2 border-rustDark p-3 bg-rustLight hover:bg-rustDark cursor-pointer transition ease-in-out duration-150"
+             hx-get="/voting/paperNoDetails/{{paper.id}}"
+             hx-target="#paper-details-{{paper.id}}"
+        >
+            <svg class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path d="m4.5 15.75 7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </div>
+    <div class="flex flex-col space-y-2 bg-rustLight p-3 rounded-b-md border-t-2 border-rustDark">
+        <div>Speaker: {{ paper.speaker }}</div>
+        <div>{{paper.description}}</div>
+    </div>
+</div>
