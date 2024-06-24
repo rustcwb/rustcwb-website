@@ -3,6 +3,7 @@
 use chrono::NaiveDate;
 use thiserror::Error;
 use ulid::Ulid;
+use url::Url;
 
 use crate::{AccessToken, FutureMeetUp, Paper, PastMeetUp, PastMeetUpMetadata, User, Vote};
 
@@ -41,6 +42,16 @@ pub trait FutureMeetUpGateway {
         &self,
         id: &Ulid,
     ) -> Result<FutureMeetUp, UpdateFutureMeetUpError>;
+    async fn update_future_meet_up_to_scheduled(
+        &self,
+        id: &Ulid,
+        paper_id: &Ulid,
+    ) -> Result<FutureMeetUp, UpdateFutureMeetUpError>;
+    async fn finish_future_meet_up(
+        &self,
+        id: &Ulid,
+        link: Url,
+    ) -> Result<(), UpdateFutureMeetUpError>;
 }
 
 #[derive(Debug, Error)]
@@ -158,6 +169,7 @@ pub trait VoteGateway {
         meet_up_id: &Ulid,
         user_id: &Ulid,
     ) -> Result<Vec<Vote>, VoteError>;
+    async fn get_votes_for_meet_up(&self, meet_up_id: &Ulid) -> Result<Vec<Vote>, VoteError>;
 }
 
 #[derive(Debug, Error)]

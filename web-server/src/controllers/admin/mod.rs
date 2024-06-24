@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_htmx::HxRequest;
 use domain::show_admin_page;
-use future_meet_up::{create_future_meet_up, go_for_voting};
+use future_meet_up::{create_future_meet_up, finish, go_for_voting, schedule};
 use minijinja::context;
 
 use crate::{app::AppState, controllers::FutureMeetUpPresenter, extractors::AdminUser};
@@ -22,6 +22,8 @@ pub fn admin_router() -> Router<Arc<AppState>> {
         .route("/", get(admin))
         .route("/createFutureMeetUp", post(create_future_meet_up))
         .route("/moveFutureMeetUpIntoVoting", post(go_for_voting))
+        .route("/schedule", post(schedule))
+        .route("/finish", post(finish))
 }
 
 pub async fn admin(

@@ -81,7 +81,7 @@ impl PaperGateway for SqliteDatabaseGateway {
             .await;
         match result {
             Ok(paper) => Ok(paper),
-            Err(sqlx::Error::RowNotFound) => Err(GetPaperError::NotFound(id.clone())),
+            Err(sqlx::Error::RowNotFound) => Err(GetPaperError::NotFound(*id)),
             Err(err) => Err(GetPaperError::Unknown(error_and_log!("SQLX Error: {err}"))),
         }
     }

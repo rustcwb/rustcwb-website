@@ -2,8 +2,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
-use axum::Router;
 use axum::routing::{get, post};
+use axum::Router;
 use minijinja::Environment;
 use tower_http::services::ServeDir;
 
@@ -106,6 +106,10 @@ impl AppState {
         add_template!(env, "templates/components/admin/future_meet_up/voting.html");
         add_template!(
             env,
+            "templates/components/admin/future_meet_up/scheduled.html"
+        );
+        add_template!(
+            env,
             "templates/components/future_meet_ups/future_meet_up.html"
         );
         add_template!(
@@ -113,6 +117,7 @@ impl AppState {
             "templates/components/future_meet_ups/call_for_papers.html"
         );
         add_template!(env, "templates/components/future_meet_ups/voting.html");
+        add_template!(env, "templates/components/future_meet_ups/scheduled.html");
         Ok(Self {
             admin_details,
             github_gateway,

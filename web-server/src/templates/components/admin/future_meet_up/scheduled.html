@@ -1,17 +1,21 @@
 <article class="flex-col mt-3" id="futureMeetup">
-    <p class="text-md py-2">In voting</p>
+    <p class="text-md py-2">Scheduled</p>
     <p class="text-md py-2">Location: {{ future_meet_up.location }}</p>
     <p class="text-md py-2">Date: {{ future_meet_up.date }}</p>
-    <p class="text-md py-2">Number of papers: {{ n_papers }}</p>
+    <p class="text-md py-2">Title: {{ future_meet_up.title }}</p>
+    <p class="text-md py-2">Speaker: {{ future_meet_up.speaker }}</p>
+    <p class="text-md py-2">Description: {{ future_meet_up.Description }}</p>
     <form
         class="flex flex-col items-left justify-items-start space-y-3 mt-4"
-        hx-post="/admin/schedule"
+        hx-post="/admin/finish"
         hx-target="#futureMeetup"
     >
+        <label for="link">Link:</label>
+        <input type="text" name="link" />
         <input
             class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
             type="submit"
-            value="Decide and Schedule"
+            value="Complete and Move to Past Meetups"
         />
     </form>
 </article>

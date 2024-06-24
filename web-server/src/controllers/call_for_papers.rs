@@ -40,7 +40,7 @@ pub async fn save_call_for_papers(
         errors.push("Speaker is required");
     }
     if !errors.is_empty() {
-        return Ok(call_for_papers_with_errors(&errors, user, is_hx_request, &state).await?);
+        return call_for_papers_with_errors(&errors, user, is_hx_request, &state).await;
     }
     match submit_paper(
         &state.database_gateway,
@@ -66,22 +66,22 @@ pub async fn save_call_for_papers(
         }
         Err(SubmitPaperError::InvalidMeetUpState(_))
         | Err(SubmitPaperError::NoFutureMeetUpFound) => {
-            return Ok(call_for_papers_with_errors(
+            call_for_papers_with_errors(
                 &["Meet up is not accepting papers"],
                 user,
                 is_hx_request,
                 &state,
             )
-            .await?)
+            .await
         }
         Err(SubmitPaperError::MoreThanLimitPapersPerUserPerMeetUp(_)) => {
-            return Ok(call_for_papers_with_errors(
+            call_for_papers_with_errors(
                 &["You have already submitted the limit of papers for this meet up"],
                 user,
                 is_hx_request,
                 &state,
             )
-            .await?)
+            .await
         }
         Err(SubmitPaperError::Unknown(err)) => Err(HtmlError::from(anyhow!("{err}"))),
     }

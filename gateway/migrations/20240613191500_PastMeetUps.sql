@@ -1,10 +1,9 @@
 CREATE TABLE IF NOT EXISTS past_meet_ups (
     id UUID PRIMARY KEY NOT NULL,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    speaker TEXT NOT NULL,
+    paper_id UUID REFERENCES papers(id),
     date DATE NOT NULL,
     link TEXT NOT NULL,
+    location TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

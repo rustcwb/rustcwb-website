@@ -1,6 +1,6 @@
 use chrono::Utc;
 use domain::{Vote, VoteError, VoteGateway};
-use sqlx::Row;
+use sqlx::{sqlite::SqliteRow, Row};
 use ulid::Ulid;
 
 use crate::{error_and_log, SqliteDatabaseGateway};
@@ -25,7 +25,7 @@ impl VoteGateway for SqliteDatabaseGateway {
             .bind(vote.paper_id.to_bytes().as_slice())
             .bind(vote.meet_up_id.to_bytes().as_slice())
             .bind(vote.vote)
-            .bind(&now)
+            .bind(now)
             .bind(now)
             .execute(&mut *transaction)
             .await
@@ -47,7 +47,7 @@ impl VoteGateway for SqliteDatabaseGateway {
             sqlx::query("SELECT * FROM meet_up_papers_votes WHERE meet_up_id = ? AND user_id = ? ORDER BY vote ASC")
                 .bind(meet_up_id.to_bytes().as_slice())
                 .bind(user_id.to_bytes().as_slice())
-                .try_map(|row: sqlx::sqlite::SqliteRow| {
+                .try_map(|row: SqliteRow| {
                     Ok(Vote {
                         user_id: Ulid::from_bytes(
                             row.try_get::<&[u8], _>("user_id")?
@@ -70,6 +70,35 @@ impl VoteGateway for SqliteDatabaseGateway {
                 .fetch_all(&self.sqlite_pool)
                 .await
                 .map_err(|err| error_and_log!("SQLX Error: `{err}`"))?;
+        Ok(votes)
+    }
+
+    async fn get_votes_for_meet_up(&self, meet_up_id: &Ulid) -> Result<Vec<Vote>, VoteError> {
+        let votes = sqlx::query("SELECT * FROM meet_up_papers_votes WHERE meet_up_id = ?")
+            .bind(meet_up_id.to_bytes().as_slice())
+            .try_map(|row: SqliteRow| {
+                Ok(Vote {
+                    user_id: Ulid::from_bytes(
+                        row.try_get::<&[u8], _>("user_id")?
+                            .try_into()
+                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
+                    ),
+                    paper_id: Ulid::from_bytes(
+                        row.try_get::<&[u8], _>("paper_id")?
+                            .try_into()
+                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
+                    ),
+                    meet_up_id: Ulid::from_bytes(
+                        row.try_get::<&[u8], _>("meet_up_id")?
+                            .try_into()
+                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
+                    ),
+                    vote: row.try_get("vote")?,
+                })
+            })
+            .fetch_all(&self.sqlite_pool)
+            .await
+            .map_err(|err| error_and_log!("SQLX Error: `{err}`"))?;
         Ok(votes)
     }
 }

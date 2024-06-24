@@ -1,9 +1,7 @@
 CREATE TABLE IF NOT EXISTS future_meet_ups (
     id UUID PRIMARY KEY NOT NULL,
-    title TEXT NULL,
+    paper_id UUID REFERENCES papers(id),
     state INT NOT NULL,
-    description TEXT NULL,
-    speaker TEXT NULL,
     date DATE NOT NULL,
     location TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

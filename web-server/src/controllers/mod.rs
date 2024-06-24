@@ -96,11 +96,12 @@ struct FutureMeetUpPresenter {
 impl From<FutureMeetUp> for FutureMeetUpPresenter {
     fn from(meetup: FutureMeetUp) -> Self {
         let (state, title, description, speaker) = match meetup.state {
-            FutureMeetUpState::Scheduled {
-                title,
-                description,
-                speaker,
-            } => ("Scheduled".into(), title, description, speaker),
+            FutureMeetUpState::Scheduled(paper) => (
+                "Scheduled".into(),
+                paper.title,
+                paper.description,
+                paper.speaker,
+            ),
             FutureMeetUpState::CallForPapers => (
                 "CallForPapers".into(),
                 String::new(),

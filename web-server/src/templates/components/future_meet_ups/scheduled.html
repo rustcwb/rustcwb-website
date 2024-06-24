@@ -1,0 +1,18 @@
+<header>
+    <h3 class="font-bold text-xl">{{ future_meet_up.title }}</h3>
+</header>
+<div>
+    Data:
+    <time datetime="{{ future_meet_up.date }}">{{ future_meet_up.date }}</time>
+</div>
+<p>Speaker: {{ future_meet_up.speaker }}</p>
+<address>Local: {{ future_meet_up.location }}</address>
+<p class="py-2">{{ future_meet_up.description }}</p>
+<p class="text-md py-2">
+    Para se inscrever
+    <a
+        class="underline transition ease-in-out duration-150 hover:text-rust"
+        href="#"
+        >click aqui</a
+    >. É gratuito.
+</p>

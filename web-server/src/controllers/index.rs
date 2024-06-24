@@ -5,7 +5,11 @@ use axum_htmx::HxRequest;
 use domain::show_home_page;
 use minijinja::context;
 
-use crate::{app::AppState, controllers::UserPresenter, extractors::MaybeUser};
+use crate::{
+    app::AppState,
+    controllers::{FutureMeetUpPresenter, UserPresenter},
+    extractors::MaybeUser,
+};
 
 use super::HtmlError;
 
@@ -21,7 +25,7 @@ pub async fn index(
     let context = context! {
         user => maybe_user.0.map(UserPresenter::from),
         client_id => state.github_client_id.clone(),
-        future_meet_up => future_meet_up,
+        future_meet_up => future_meet_up.map(FutureMeetUpPresenter::from),
         past_meetups => past_meet_ups,
     };
     match is_hx_request {

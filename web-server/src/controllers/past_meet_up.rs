@@ -57,9 +57,9 @@ impl From<PastMeetUp> for PastMeetUpPresenter {
     fn from(meetup: PastMeetUp) -> Self {
         Self {
             id: meetup.id,
-            title: meetup.title,
-            description: markdown::to_html(&meetup.description),
-            speaker: meetup.speaker,
+            title: meetup.paper.title,
+            description: markdown::to_html(&meetup.paper.description),
+            speaker: meetup.paper.speaker,
             date: meetup.date,
             link: meetup.link,
         }
