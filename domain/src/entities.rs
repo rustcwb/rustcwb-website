@@ -179,6 +179,7 @@ impl VoteDecider {
         Self { votes }
     }
 
+    /// We use harmonic positional voting https://en.wikipedia.org/wiki/Positional_voting
     pub fn decide(&self) -> Option<Ulid> {
         let votes_per_paper_id: HashMap<Ulid, f64> =
             self.votes
