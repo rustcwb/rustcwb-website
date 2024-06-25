@@ -12,9 +12,13 @@ pub struct SqliteDatabaseGateway {
 }
 
 impl SqliteDatabaseGateway {
-    pub async fn new(database_url: String) -> Result<Self> {
+    pub async fn new(database_url: &str) -> Result<Self> {
         let sqlite_pool = SqlitePool::connect(&database_url).await?;
         sqlx::migrate!("./migrations").run(&sqlite_pool).await?;
         Ok(Self { sqlite_pool })
+    }
+    #[cfg(test)]
+    pub async fn new_for_test() -> Result<Self> {
+        Self::new("sqlite::memory:").await
     }
 }

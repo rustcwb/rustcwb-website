@@ -680,6 +680,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sqlx",
+ "tokio",
  "tracing",
  "ulid",
  "url",
@@ -2279,6 +2280,16 @@ dependencies = [
  "fastrand",
  "rustix",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "tests"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "domain",
+ "gateway",
+ "tokio",
 ]
 
 [[package]]

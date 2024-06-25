@@ -32,11 +32,11 @@ pub async fn show_voting(
                 papers
                     .iter()
                     .enumerate()
-                    .map(|(vote, paper)| Vote {
+                    .map(|(pos, paper)| Vote {
                         user_id: *user_id,
                         paper_id: paper.id,
                         meet_up_id: future_meet_up.id,
-                        vote: vote as u32,
+                        vote: 1.0 / ((pos + 1) as f64),
                     })
                     .collect(),
             )
@@ -71,11 +71,11 @@ pub async fn store_votes(
     let votes = papers
         .into_iter()
         .enumerate()
-        .map(|(vote, paper_id)| Vote {
+        .map(|(pos, paper_id)| Vote {
             user_id: *user_id,
             paper_id,
             meet_up_id: future_meet_up.id,
-            vote: vote as u32,
+            vote: 1.0 / ((pos + 1) as f64),
         })
         .collect();
     vote_gateway.store_votes(votes).await?;

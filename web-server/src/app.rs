@@ -40,7 +40,7 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
         .route("/github/authorize", get(github_login))
         .route("/logout", get(logout))
         .with_state(Arc::new(AppState::new(
-            SqliteDatabaseGateway::new(database_url).await?,
+            SqliteDatabaseGateway::new(&database_url).await?,
             GithubRestGateway::new(client_id.clone(), client_secret),
             client_id,
             admin_details,

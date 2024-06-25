@@ -44,7 +44,7 @@ impl VoteGateway for SqliteDatabaseGateway {
         user_id: &Ulid,
     ) -> Result<Vec<Vote>, VoteError> {
         let votes =
-            sqlx::query("SELECT * FROM meet_up_papers_votes WHERE meet_up_id = ? AND user_id = ? ORDER BY vote ASC")
+            sqlx::query("SELECT * FROM meet_up_papers_votes WHERE meet_up_id = ? AND user_id = ? ORDER BY vote DESC")
                 .bind(meet_up_id.to_bytes().as_slice())
                 .bind(user_id.to_bytes().as_slice())
                 .try_map(|row: SqliteRow| {
