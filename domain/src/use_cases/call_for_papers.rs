@@ -2,18 +2,17 @@ use thiserror::Error;
 use ulid::Ulid;
 
 use crate::{
-    FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, GetPaperError, Paper, PaperGateway,
-    StorePaperError, User,
+    GetPaperError, MeetUp, MeetUpGateway, MeetUpState, Paper, PaperGateway, StorePaperError, User,
 };
 
 const MAX_PAPERS_PER_USER_PER_MEET_UP: u8 = 2;
 
 pub async fn show_call_for_papers(
     paper_gateway: &impl PaperGateway,
-    future_meet_up_gateway: &impl FutureMeetUpGateway,
+    meet_up_gateway: &impl MeetUpGateway,
     user: &User,
-) -> anyhow::Result<(FutureMeetUp, Vec<Paper>, bool)> {
-    let future_meet_up = future_meet_up_gateway
+) -> anyhow::Result<(MeetUp, Vec<Paper>, bool)> {
+    let future_meet_up = meet_up_gateway
         .get_future_meet_up()
         .await?
         .ok_or_else(|| anyhow::anyhow!("No future meetups found"))?;
@@ -26,17 +25,19 @@ pub async fn show_call_for_papers(
 
 pub async fn submit_paper(
     paper_gateway: &impl PaperGateway,
-    future_meet_up_gateway: &impl FutureMeetUpGateway,
+    meet_up_gateway: &impl MeetUpGateway,
     paper: Paper,
 ) -> Result<(), SubmitPaperError> {
-    let future_meet_up = future_meet_up_gateway
+    let future_meet_up = meet_up_gateway
         .get_future_meet_up()
         .await
         .map_err(|err| SubmitPaperError::Unknown(err.into()))?
         .ok_or(SubmitPaperError::NoFutureMeetUpFound)?;
     // We can have a concurrency problem here, but we are not handling it for now.
-    if future_meet_up.state != FutureMeetUpState::CallForPapers {
-        return Err(SubmitPaperError::InvalidMeetUpState(future_meet_up.state));
+    if future_meet_up.state != MeetUpState::CallForPapers {
+        return Err(SubmitPaperError::InvalidMeetUpState(Box::new(
+            future_meet_up.state,
+        )));
     }
 
     paper_gateway
@@ -60,7 +61,7 @@ pub async fn get_paper(
 #[derive(Debug, Error)]
 pub enum SubmitPaperError {
     #[error("Invalid meet up state: `{0}`")]
-    InvalidMeetUpState(FutureMeetUpState),
+    InvalidMeetUpState(Box<MeetUpState>),
     #[error("No future meetups found")]
     NoFutureMeetUpFound,
     #[error("More than limit papaers per user per meetups. Limit is `{0}`")]

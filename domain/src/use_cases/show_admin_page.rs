@@ -1,10 +1,10 @@
-use crate::{FutureMeetUp, FutureMeetUpGateway, PaperGateway};
+use crate::{MeetUp, MeetUpGateway, PaperGateway};
 
 pub async fn show_admin_page(
-    future_meet_up_gateway: &impl FutureMeetUpGateway,
+    meet_up_gateway: &impl MeetUpGateway,
     papers_gateway: &impl PaperGateway,
-) -> anyhow::Result<(Option<FutureMeetUp>, usize)> {
-    let future_meet_up = future_meet_up_gateway.get_future_meet_up().await?;
+) -> anyhow::Result<(Option<MeetUp>, usize)> {
+    let future_meet_up = meet_up_gateway.get_future_meet_up().await?;
     let n_papers = match &future_meet_up {
         None => 0,
         Some(future_meet_up) => papers_gateway

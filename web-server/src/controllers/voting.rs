@@ -1,13 +1,14 @@
 use std::sync::Arc;
 
-use axum::{extract::State, Form, response::Html};
 use axum::extract::Path;
+use axum::{extract::State, response::Html, Form};
 use axum_htmx::HxRequest;
 use minijinja::context;
 use ulid::Ulid;
 
 use domain::{get_paper, show_voting, store_votes};
 
+use crate::controllers::MeetUpPresenter;
 use crate::{app::AppState, controllers::UserPresenter, extractors::LoggedUser};
 
 use super::HtmlError;
@@ -25,12 +26,12 @@ pub async fn voting(
         &state.database_gateway,
         &user.0.id,
     )
-        .await?;
+    .await?;
 
     let context = context! {
         user => UserPresenter::from(user.0),
         client_id => state.github_client_id.clone(),
-        future_meet_up => future_meet_up,
+        future_meet_up => MeetUpPresenter::from(future_meet_up),
         papers => papers,
         errors => Vec::<String>::new(),
     };
@@ -51,21 +52,20 @@ pub async fn store_vote(
         &state.database_gateway,
         &state.database_gateway,
         &user.0.id,
-        form.into_iter().map(|(_, paper_id)| {
-            paper_id
-        }).collect(),
-    ).await?;
+        form.into_iter().map(|(_, paper_id)| paper_id).collect(),
+    )
+    .await?;
     let (future_meet_up, papers) = show_voting(
         &state.database_gateway,
         &state.database_gateway,
         &state.database_gateway,
         &user.0.id,
     )
-        .await?;
+    .await?;
     let context = context! {
         user => UserPresenter::from(user.0),
         client_id => state.github_client_id.clone(),
-        future_meet_up => future_meet_up,
+        future_meet_up => MeetUpPresenter::from(future_meet_up),
         papers => papers,
         errors => Vec::<String>::new(),
     };
@@ -77,7 +77,9 @@ pub async fn paper_details(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let paper = get_paper(&state.database_gateway, &paper_id).await?;
-    let tmpl = state.get_minijinja_env().get_template("components/vote_paper/paper_details")?;
+    let tmpl = state
+        .get_minijinja_env()
+        .get_template("components/vote_paper/paper_details")?;
     let context = context! {
         paper => paper,
     };
@@ -89,7 +91,9 @@ pub async fn paper_no_details(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let paper = get_paper(&state.database_gateway, &paper_id).await?;
-    let tmpl = state.get_minijinja_env().get_template("components/vote_paper/paper")?;
+    let tmpl = state
+        .get_minijinja_env()
+        .get_template("components/vote_paper/paper")?;
     let context = context! {
         paper => paper,
     };

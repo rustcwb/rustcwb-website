@@ -1,11 +1,10 @@
-use crate::{FutureMeetUp, FutureMeetUpGateway, PastMeetUpGateway, PastMeetUpMetadata};
+use crate::{MeetUp, MeetUpGateway, MeetUpMetadata};
 
 pub async fn show_home_page(
-    past_meet_up_gateway: &impl PastMeetUpGateway,
-    future_meet_up_gateway: &impl FutureMeetUpGateway,
-) -> anyhow::Result<(Option<FutureMeetUp>, Vec<PastMeetUpMetadata>)> {
+    meet_up_gateway: &impl MeetUpGateway,
+) -> anyhow::Result<(Option<MeetUp>, Vec<MeetUpMetadata>)> {
     Ok((
-        future_meet_up_gateway.get_future_meet_up().await?,
-        past_meet_up_gateway.list_past_meet_ups().await?,
+        meet_up_gateway.get_future_meet_up().await?,
+        meet_up_gateway.list_past_meet_ups().await?,
     ))
 }

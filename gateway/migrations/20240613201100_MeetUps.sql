@@ -1,10 +1,11 @@
-CREATE TABLE IF NOT EXISTS past_meet_ups (
+CREATE TABLE IF NOT EXISTS meet_ups (
     id UUID PRIMARY KEY NOT NULL,
     paper_id UUID REFERENCES papers(id),
+    state INT NOT NULL,
     date DATE NOT NULL,
-    link TEXT NOT NULL,
     location TEXT NOT NULL,
+    link TEXT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS past_meet_ups_date_index ON past_meet_ups (date);
+CREATE INDEX IF NOT EXISTS meet_ups_state_date_index ON meet_ups (state, date);

@@ -1,0 +1,15 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["macros"] }
+domain = { path = "../domain" }
+gateway = { path = "../gateway" }
+anyhow = "1"
+
+
+[[test]]
+name = "get_meet_up"
+path = "get_meet_up_test.rs"

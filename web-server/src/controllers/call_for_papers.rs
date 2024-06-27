@@ -8,7 +8,11 @@ use minijinja::context;
 use serde::Deserialize;
 use ulid::Ulid;
 
-use crate::{app::AppState, controllers::UserPresenter, extractors::LoggedUser};
+use crate::{
+    app::AppState,
+    controllers::{MeetUpPresenter, UserPresenter},
+    extractors::LoggedUser,
+};
 
 use super::HtmlError;
 
@@ -100,7 +104,7 @@ async fn call_for_papers_with_errors(
     let context = context! {
         user => UserPresenter::from(user.0),
         client_id => state.github_client_id.clone(),
-        future_meet_up => future_meet_up,
+        future_meet_up => MeetUpPresenter::from(future_meet_up),
         papers => papers,
         is_papers_limit => is_papers_limit,
         errors => errors,

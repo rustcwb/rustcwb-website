@@ -7,47 +7,41 @@ use ulid::Ulid;
 use url::Url;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PastMeetUp {
-    pub id: Ulid,
-    pub paper: Paper,
-    pub date: NaiveDate,
-    pub link: Url,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PastMeetUpMetadata {
+pub struct MeetUpMetadata {
     id: Ulid,
     title: String,
     date: NaiveDate,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct FutureMeetUp {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MeetUp {
     pub id: Ulid,
-    pub state: FutureMeetUpState,
+    pub state: MeetUpState,
     pub location: String,
     pub date: NaiveDate,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub enum FutureMeetUpState {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MeetUpState {
     CallForPapers,
     Voting,
     Scheduled(Paper),
+    Done { paper: Paper, link: Url },
 }
 
-impl std::fmt::Display for FutureMeetUpState {
+impl std::fmt::Display for MeetUpState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FutureMeetUpState::CallForPapers => write!(f, "CallForPapers"),
-            FutureMeetUpState::Voting => write!(f, "Voting"),
-            FutureMeetUpState::Scheduled { .. } => write!(f, "Scheduled"),
+            MeetUpState::CallForPapers => write!(f, "CallForPapers"),
+            MeetUpState::Voting => write!(f, "Voting"),
+            MeetUpState::Scheduled { .. } => write!(f, "Scheduled"),
+            MeetUpState::Done { .. } => write!(f, "Done"),
         }
     }
 }
 
-impl FutureMeetUp {
-    pub fn new(id: Ulid, state: FutureMeetUpState, location: String, date: NaiveDate) -> Self {
+impl MeetUp {
+    pub fn new(id: Ulid, state: MeetUpState, location: String, date: NaiveDate) -> Self {
         Self {
             id,
             state,
@@ -57,18 +51,7 @@ impl FutureMeetUp {
     }
 }
 
-impl PastMeetUp {
-    pub fn new(id: Ulid, paper: Paper, date: NaiveDate, link: Url) -> Self {
-        Self {
-            id,
-            paper,
-            date,
-            link,
-        }
-    }
-}
-
-impl PastMeetUpMetadata {
+impl MeetUpMetadata {
     pub fn new(id: Ulid, title: String, date: NaiveDate) -> Self {
         Self { id, title, date }
     }

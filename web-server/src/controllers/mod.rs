@@ -1,14 +1,13 @@
 use axum::response::{Html, IntoResponse};
 use chrono::NaiveDate;
-use domain::{FutureMeetUp, FutureMeetUpState, User};
+use domain::{MeetUp, MeetUpState, User};
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
 pub mod admin;
 pub mod call_for_papers;
 pub mod index;
-pub mod past_meet_up;
-pub mod preview_markdown;
+pub mod meet_up;
 pub mod user;
 pub mod voting;
 
@@ -83,34 +82,48 @@ impl From<User> for UserPresenter {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct FutureMeetUpPresenter {
+struct MeetUpPresenter {
     id: Ulid,
     title: String,
     state: String,
     description: String,
     speaker: String,
     date: NaiveDate,
+    link: String,
     location: String,
 }
 
-impl From<FutureMeetUp> for FutureMeetUpPresenter {
-    fn from(meetup: FutureMeetUp) -> Self {
-        let (state, title, description, speaker) = match meetup.state {
-            FutureMeetUpState::Scheduled(paper) => (
+impl From<MeetUp> for MeetUpPresenter {
+    fn from(meetup: MeetUp) -> Self {
+        let (state, title, description, speaker, link) = match meetup.state {
+            MeetUpState::Done { paper, link } => (
+                "Done".into(),
+                paper.title,
+                paper.description,
+                paper.speaker,
+                link.as_str().to_owned(),
+            ),
+            MeetUpState::Scheduled(paper) => (
                 "Scheduled".into(),
                 paper.title,
                 paper.description,
                 paper.speaker,
+                String::new(),
             ),
-            FutureMeetUpState::CallForPapers => (
+            MeetUpState::CallForPapers => (
                 "CallForPapers".into(),
                 String::new(),
                 String::new(),
                 String::new(),
+                String::new(),
             ),
-            FutureMeetUpState::Voting => {
-                ("Voting".into(), String::new(), String::new(), String::new())
-            }
+            MeetUpState::Voting => (
+                "Voting".into(),
+                String::new(),
+                String::new(),
+                String::new(),
+                String::new(),
+            ),
         };
         Self {
             id: meetup.id,
@@ -118,6 +131,7 @@ impl From<FutureMeetUp> for FutureMeetUpPresenter {
             state,
             description,
             speaker,
+            link,
             date: meetup.date,
             location: meetup.location,
         }

@@ -5,16 +5,7 @@ use thiserror::Error;
 use ulid::Ulid;
 use url::Url;
 
-use crate::{AccessToken, FutureMeetUp, Paper, PastMeetUp, PastMeetUpMetadata, User, Vote};
-
-pub trait PastMeetUpGateway {
-    async fn list_past_meet_ups(&self) -> Result<Vec<PastMeetUpMetadata>, ListPastMeetUpsError>;
-    async fn get_past_meet_up(&self, id: Ulid) -> Result<PastMeetUp, GetPastMeetUpError>;
-    async fn get_past_meet_up_metadata(
-        &self,
-        id: Ulid,
-    ) -> anyhow::Result<PastMeetUpMetadata, GetPastMeetUpError>;
-}
+use crate::{AccessToken, MeetUp, MeetUpMetadata, Paper, User, Vote};
 
 #[derive(Debug, Error)]
 pub enum ListPastMeetUpsError {
@@ -23,43 +14,42 @@ pub enum ListPastMeetUpsError {
 }
 
 #[derive(Debug, Error)]
-pub enum GetPastMeetUpError {
-    #[error("Past meet up with id `{0}` not found")]
+pub enum GetMeetUpError {
+    #[error("Meet up with id `{0}` not found")]
     NotFound(Ulid),
     #[error("Unknown error: `{0}`")]
     Unknown(#[from] anyhow::Error),
 }
 
-pub trait FutureMeetUpGateway {
-    async fn get_future_meet_up(&self) -> Result<Option<FutureMeetUp>, GetFutureMeetUpError>;
-    async fn new_future_meet_up(
+pub trait MeetUpGateway {
+    async fn get_future_meet_up(&self) -> Result<Option<MeetUp>, GetFutureMeetUpError>;
+    async fn list_past_meet_ups(&self) -> Result<Vec<MeetUpMetadata>, ListPastMeetUpsError>;
+    async fn get_meet_up(&self, id: Ulid) -> Result<MeetUp, GetMeetUpError>;
+    async fn get_meet_up_metadata(
+        &self,
+        id: Ulid,
+    ) -> anyhow::Result<MeetUpMetadata, GetMeetUpError>;
+    async fn new_meet_up(
         &self,
         id: Ulid,
         location: String,
         date: NaiveDate,
-    ) -> Result<FutureMeetUp, NewFutureMeetUpError>;
-    async fn update_future_meet_up_to_voting(
-        &self,
-        id: &Ulid,
-    ) -> Result<FutureMeetUp, UpdateFutureMeetUpError>;
-    async fn update_future_meet_up_to_scheduled(
+    ) -> Result<MeetUp, NewMeetUpError>;
+    async fn update_meet_up_to_voting(&self, id: &Ulid) -> Result<MeetUp, UpdateMeetUpError>;
+    async fn update_meet_up_to_scheduled(
         &self,
         id: &Ulid,
         paper_id: &Ulid,
-    ) -> Result<FutureMeetUp, UpdateFutureMeetUpError>;
-    async fn finish_future_meet_up(
-        &self,
-        id: &Ulid,
-        link: Url,
-    ) -> Result<(), UpdateFutureMeetUpError>;
+    ) -> Result<MeetUp, UpdateMeetUpError>;
+    async fn finish_meet_up(&self, id: &Ulid, link: Url) -> Result<(), UpdateMeetUpError>;
 }
 
 #[derive(Debug, Error)]
-pub enum UpdateFutureMeetUpError {
+pub enum UpdateMeetUpError {
     #[error("Invalid meet up state")]
     InvalidState,
-    #[error("Future meet up with not found")]
-    NotFound,
+    #[error("Meet up with id `{0}` not found")]
+    NotFound(Ulid),
     #[error("Unknown error: `{0}`")]
     Unknown(#[from] anyhow::Error),
 }
@@ -71,7 +61,7 @@ pub enum GetFutureMeetUpError {
 }
 
 #[derive(Debug, Error)]
-pub enum NewFutureMeetUpError {
+pub enum NewMeetUpError {
     #[error("Unknown error: `{0}`")]
     Unknown(#[from] anyhow::Error),
 }

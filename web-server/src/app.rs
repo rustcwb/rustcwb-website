@@ -13,8 +13,7 @@ use gateway::SqliteDatabaseGateway;
 use crate::controllers::admin::admin_router;
 use crate::controllers::call_for_papers::{call_for_papers, save_call_for_papers};
 use crate::controllers::index::index;
-use crate::controllers::past_meet_up::{past_meet_up, past_meet_up_metadata};
-use crate::controllers::preview_markdown::preview_markdown;
+use crate::controllers::meet_up::{meet_up, meet_up_metadata};
 use crate::controllers::user::{github_login, logout, user};
 use crate::controllers::voting::{paper_details, paper_no_details, store_vote, voting};
 
@@ -27,15 +26,14 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
     Ok(Router::new()
         .route("/", get(index))
         .nest("/admin", admin_router())
-        .route("/previewMarkdown", post(preview_markdown))
         .route("/callForPapers", get(call_for_papers))
         .route("/callForPapers", post(save_call_for_papers))
         .route("/voting", get(voting))
         .route("/voting/paperDetails/:id", get(paper_details))
         .route("/voting/paperNoDetails/:id", get(paper_no_details))
         .route("/storeVote", post(store_vote))
-        .route("/pastMeetUp/:id", get(past_meet_up))
-        .route("/pastMeetUp/metadata/:id", get(past_meet_up_metadata))
+        .route("/meetUp/:id", get(meet_up))
+        .route("/meetUp/metadata/:id", get(meet_up_metadata))
         .route("/user", get(user))
         .route("/github/authorize", get(github_login))
         .route("/logout", get(logout))

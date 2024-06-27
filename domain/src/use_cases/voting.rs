@@ -3,21 +3,19 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use ulid::Ulid;
 
-use crate::{
-    FutureMeetUp, FutureMeetUpGateway, FutureMeetUpState, Paper, PaperGateway, Vote, VoteGateway,
-};
+use crate::{MeetUp, MeetUpGateway, MeetUpState, Paper, PaperGateway, Vote, VoteGateway};
 
 pub async fn show_voting(
-    future_meet_up_gateway: &impl FutureMeetUpGateway,
+    meet_up_gateway: &impl MeetUpGateway,
     papers_gateway: &impl PaperGateway,
     vote_gateway: &impl VoteGateway,
     user_id: &Ulid,
-) -> anyhow::Result<(FutureMeetUp, Vec<Paper>)> {
-    let future_meet_up = future_meet_up_gateway
+) -> anyhow::Result<(MeetUp, Vec<Paper>)> {
+    let future_meet_up = meet_up_gateway
         .get_future_meet_up()
         .await?
         .ok_or(anyhow!("No meet up found"))?;
-    if future_meet_up.state != FutureMeetUpState::Voting {
+    if future_meet_up.state != MeetUpState::Voting {
         return Err(anyhow!("Invalid meet up state: {:?}", future_meet_up.state));
     }
     let votes = vote_gateway
@@ -59,12 +57,12 @@ pub async fn show_voting(
 }
 
 pub async fn store_votes(
-    future_meet_up_gateway: &impl FutureMeetUpGateway,
+    meet_up_gateway: &impl MeetUpGateway,
     vote_gateway: &impl VoteGateway,
     user_id: &Ulid,
     papers: Vec<Ulid>,
 ) -> anyhow::Result<()> {
-    let future_meet_up = future_meet_up_gateway
+    let future_meet_up = meet_up_gateway
         .get_future_meet_up()
         .await?
         .ok_or(anyhow!("No meet up found"))?;

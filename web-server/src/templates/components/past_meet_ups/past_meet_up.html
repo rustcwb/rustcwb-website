@@ -1,7 +1,7 @@
 <div
     class="flex flex-col p-4 hover:bg-rustDark transition ease-in-out duration-150"
     id="meetup-{{ meetup.id }}"
-    hx-get="/pastMeetUp/metadata/{{ meetup.id }}"
+    hx-get="/meetUp/metadata/{{ meetup.id }}"
     hx-target="#meetup-{{ meetup.id }}"
     hx-swap="outerHTML"
 >

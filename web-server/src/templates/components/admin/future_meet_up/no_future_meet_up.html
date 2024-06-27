@@ -1,18 +1,18 @@
 <article class="flex-col mt-3" id="futureMeetup">
     <p class="text-md py-2">No future meetup yet.</p>
     <form
-            class="flex flex-col items-left justify-items-start space-y-3 mt-4"
-            hx-post="/admin/createFutureMeetUp"
-            hx-target="#futureMeetup"
+        class="flex flex-col items-left justify-items-start space-y-3 mt-4"
+        hx-post="/admin/createMeetUp"
+        hx-target="#futureMeetup"
     >
         <label for="location">Location:</label>
-        <input id="location" name="location" type="text"/>
+        <input id="location" name="location" type="text" />
         <label for="date">Date:</label>
-        <input id="date" name="date" type="date"/>
+        <input id="date" name="date" type="date" />
         <input
-                class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
-                type="submit"
-                value="Create"
+            class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
+            type="submit"
+            value="Create"
         />
     </form>
 </article>
