@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
 use anyhow::anyhow;
-use axum::{extract::State, response::Html, Form};
+use axum::{extract::State, Form, response::Html};
 use axum_htmx::HxRequest;
-use domain::{show_call_for_papers, submit_paper, Paper, SubmitPaperError};
 use minijinja::context;
 use serde::Deserialize;
 use ulid::Ulid;
+
+use domain::{Paper, show_call_for_papers, submit_paper, SubmitPaperError};
 
 use crate::{
     app::AppState,
@@ -58,7 +59,7 @@ pub async fn save_call_for_papers(
             user_id: user.0.id,
         },
     )
-    .await
+        .await
     {
         Ok(_) => {
             let tmpl = state.get_minijinja_env().get_template("success")?;
@@ -76,7 +77,7 @@ pub async fn save_call_for_papers(
                 is_hx_request,
                 &state,
             )
-            .await
+                .await
         }
         Err(SubmitPaperError::MoreThanLimitPapersPerUserPerMeetUp(_)) => {
             call_for_papers_with_errors(
@@ -85,7 +86,7 @@ pub async fn save_call_for_papers(
                 is_hx_request,
                 &state,
             )
-            .await
+                .await
         }
         Err(SubmitPaperError::Unknown(err)) => Err(HtmlError::from(anyhow!("{err}"))),
     }

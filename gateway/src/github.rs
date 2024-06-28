@@ -1,10 +1,12 @@
-use crate::error_and_log;
 use chrono::Utc;
+use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
+use serde::Deserialize;
+
 use domain::{
     AccessToken, ExchangeCodeError, GithubGateway, RefreshTokenError, UserInfoGithubError,
 };
-use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
-use serde::Deserialize;
+
+use crate::error_and_log;
 
 pub struct GithubRestGateway {
     client: reqwest::Client,

@@ -1,4 +1,5 @@
 use anyhow::Result;
+
 use domain::get_future_meet_up;
 use gateway::SqliteDatabaseGateway;
 

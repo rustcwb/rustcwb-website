@@ -1,7 +1,9 @@
-use crate::error_and_log;
-use domain::{AccessToken, GetUserError, LoginMethod, StoreUserError, User, UserGateway};
-use sqlx::{sqlite::SqliteRow, Error, Row};
+use sqlx::{Error, Row, sqlite::SqliteRow};
 use ulid::Ulid;
+
+use domain::{AccessToken, GetUserError, LoginMethod, StoreUserError, User, UserGateway};
+
+use crate::error_and_log;
 
 use super::SqliteDatabaseGateway;
 
@@ -23,38 +25,14 @@ impl UserGateway for SqliteDatabaseGateway {
             JOIN github_logins gl ON u.id = gl.user_id
             WHERE u.access_token = ?"#,
         )
-        .bind(access_token)
-        .try_map(|row: SqliteRow| {
-            Ok(User::new(
-                Ulid::from_bytes(
-                    row.try_get::<&[u8], _>("user_id")?
-                        .try_into()
-                        .map_err(|err| Error::Decode(Box::new(err)))?,
-                ),
-                row.get("nickname"),
-                row.get("email"),
-                AccessToken::new(row.get("access_token"), row.get("expires_at")),
-                match row.get("login_method") {
-                    0 => LoginMethod::Github {
-                        access_token: AccessToken::new(
-                            row.get("github_access_token"),
-                            row.get("github_expires_at"),
-                        ),
-                        refresh_token: AccessToken::new(
-                            row.get("refresh_token"),
-                            row.get("refresh_token_expires_at"),
-                        ),
-                    },
-                    _ => return Err(Error::Decode("Unknown login method".into())),
-                },
-            ))
-        })
-        .fetch_one(&self.sqlite_pool)
-        .await
-        .map_err(|err| match err {
-            Error::RowNotFound => GetUserError::NotFound,
-            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
-        })
+            .bind(access_token)
+            .try_map(user_from_row)
+            .fetch_one(&self.sqlite_pool)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => GetUserError::NotFound,
+                _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
+            })
     }
 
     async fn store_user(&self, user: User) -> Result<User, StoreUserError> {
@@ -119,37 +97,40 @@ impl UserGateway for SqliteDatabaseGateway {
             JOIN github_logins gl ON u.id = gl.user_id
             WHERE u.email = ?"#,
         )
-        .bind(email)
-        .try_map(|row: SqliteRow| {
-            Ok(User::new(
-                Ulid::from_bytes(
-                    row.try_get::<&[u8], _>("user_id")?
-                        .try_into()
-                        .map_err(|err| Error::Decode(Box::new(err)))?,
-                ),
-                row.get("nickname"),
-                row.get("email"),
-                AccessToken::new(row.get("access_token"), row.get("expires_at")),
-                match row.get("login_method") {
-                    0 => LoginMethod::Github {
-                        access_token: AccessToken::new(
-                            row.get("github_access_token"),
-                            row.get("github_expires_at"),
-                        ),
-                        refresh_token: AccessToken::new(
-                            row.get("refresh_token"),
-                            row.get("refresh_token_expires_at"),
-                        ),
-                    },
-                    _ => return Err(Error::Decode("Unknown login method".into())),
-                },
-            ))
-        })
-        .fetch_one(&self.sqlite_pool)
-        .await
-        .map_err(|err| match err {
-            Error::RowNotFound => GetUserError::NotFound,
-            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
-        })
+            .bind(email)
+            .try_map(user_from_row)
+            .fetch_one(&self.sqlite_pool)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => GetUserError::NotFound,
+                _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
+            })
     }
 }
+
+fn user_from_row(row: SqliteRow) -> Result<User, Error> {
+    Ok(User::new(
+        Ulid::from_bytes(
+            row.try_get::<&[u8], _>("user_id")?
+                .try_into()
+                .map_err(|err| Error::Decode(Box::new(err)))?,
+        ),
+        row.get("nickname"),
+        row.get("email"),
+        AccessToken::new(row.get("access_token"), row.get("expires_at")),
+        match row.get("login_method") {
+            0 => LoginMethod::Github {
+                access_token: AccessToken::new(
+                    row.get("github_access_token"),
+                    row.get("github_expires_at"),
+                ),
+                refresh_token: AccessToken::new(
+                    row.get("refresh_token"),
+                    row.get("refresh_token_expires_at"),
+                ),
+            },
+            _ => return Err(Error::Decode("Unknown login method".into())),
+        },
+    ))
+}
+

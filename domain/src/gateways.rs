@@ -133,7 +133,7 @@ pub trait PaperGateway {
         meet_up_id: &Ulid,
     ) -> Result<Vec<Paper>, GetPaperError>;
     async fn get_papers_from_meet_up(&self, meet_up_id: &Ulid)
-        -> Result<Vec<Paper>, GetPaperError>;
+                                     -> Result<Vec<Paper>, GetPaperError>;
 }
 
 #[derive(Debug, Error)]

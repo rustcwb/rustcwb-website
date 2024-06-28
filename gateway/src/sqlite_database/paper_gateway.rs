@@ -1,6 +1,7 @@
-use domain::{GetPaperError, Paper, PaperGateway, StorePaperError};
-use sqlx::{sqlite::SqliteRow, Row};
+use sqlx::{Error, Row, sqlite::SqliteRow};
 use ulid::Ulid;
+
+use domain::{GetPaperError, Paper, PaperGateway, StorePaperError};
 
 use crate::{error_and_log, SqliteDatabaseGateway};
 
@@ -59,24 +60,7 @@ impl PaperGateway for SqliteDatabaseGateway {
     async fn get_paper(&self, id: &Ulid) -> Result<Paper, GetPaperError> {
         let result = sqlx::query("SELECT * FROM papers WHERE id = ?")
             .bind(id.to_bytes().as_slice())
-            .try_map(|row: SqliteRow| {
-                Ok(Paper {
-                    id: Ulid::from_bytes(
-                        row.try_get::<&[u8], _>("id")?
-                            .try_into()
-                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
-                    ),
-                    title: row.get("title"),
-                    description: row.get("description"),
-                    speaker: row.get("speaker"),
-                    email: row.get("email"),
-                    user_id: Ulid::from_bytes(
-                        row.try_get::<&[u8], _>("user_id")?
-                            .try_into()
-                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
-                    ),
-                })
-            })
+            .try_map(paper_from_row)
             .fetch_one(&self.sqlite_pool)
             .await;
         match result {
@@ -94,24 +78,7 @@ impl PaperGateway for SqliteDatabaseGateway {
         let result = sqlx::query("SELECT * FROM papers p JOIN meet_up_papers mup ON p.id = mup.paper_id WHERE mup.meet_up_id = ? AND p.user_id = ?")
             .bind(meet_up_id.to_bytes().as_slice())
             .bind(user_id.to_bytes().as_slice())
-            .try_map(|row: SqliteRow| {
-                Ok(Paper {
-                    id: Ulid::from_bytes(
-                        row.try_get::<&[u8], _>("id")?
-                            .try_into()
-                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
-                    ),
-                    title: row.get("title"),
-                    description: row.get("description"),
-                    speaker: row.get("speaker"),
-                    email: row.get("email"),
-                    user_id: Ulid::from_bytes(
-                        row.try_get::<&[u8], _>("user_id")?
-                            .try_into()
-                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
-                    ),
-                })
-            })
+            .try_map(paper_from_row)
             .fetch_all(&self.sqlite_pool)
             .await
             .map_err(|err| GetPaperError::Unknown(error_and_log!("SQLX Error: {err}")))?;
@@ -124,27 +91,29 @@ impl PaperGateway for SqliteDatabaseGateway {
     ) -> Result<Vec<Paper>, GetPaperError> {
         let result = sqlx::query("SELECT * FROM papers p JOIN meet_up_papers mup ON p.id = mup.paper_id WHERE mup.meet_up_id = ?")
             .bind(meet_up_id.to_bytes().as_slice())
-            .try_map(|row: SqliteRow| {
-                Ok(Paper {
-                    id: Ulid::from_bytes(
-                        row.try_get::<&[u8], _>("id")?
-                            .try_into()
-                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
-                    ),
-                    title: row.get("title"),
-                    description: row.get("description"),
-                    speaker: row.get("speaker"),
-                    email: row.get("email"),
-                    user_id: Ulid::from_bytes(
-                        row.try_get::<&[u8], _>("user_id")?
-                            .try_into()
-                            .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
-                    ),
-                })
-            })
+            .try_map(paper_from_row)
             .fetch_all(&self.sqlite_pool)
             .await
             .map_err(|err| GetPaperError::Unknown(error_and_log!("SQLX Error: {err}")))?;
         Ok(result)
     }
+}
+
+fn paper_from_row(row: SqliteRow) -> Result<Paper, Error> {
+    Ok(Paper {
+        id: Ulid::from_bytes(
+            row.try_get::<&[u8], _>("id")?
+                .try_into()
+                .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
+        ),
+        title: row.get("title"),
+        description: row.get("description"),
+        speaker: row.get("speaker"),
+        email: row.get("email"),
+        user_id: Ulid::from_bytes(
+            row.try_get::<&[u8], _>("user_id")?
+                .try_into()
+                .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
+        ),
+    })
 }

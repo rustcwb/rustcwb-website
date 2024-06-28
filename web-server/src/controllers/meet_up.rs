@@ -4,9 +4,10 @@ use axum::{
     extract::{Path, State},
     response::Html,
 };
-use domain::{get_meet_up, get_meet_up_metadata};
 use minijinja::context;
 use ulid::Ulid;
+
+use domain::{get_meet_up, get_meet_up_metadata};
 
 use crate::{app::AppState, controllers::MeetUpPresenter};
 

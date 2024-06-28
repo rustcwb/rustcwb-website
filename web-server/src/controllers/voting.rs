@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
+use axum::{extract::State, Form, response::Html};
 use axum::extract::Path;
-use axum::{extract::State, response::Html, Form};
 use axum_htmx::HxRequest;
 use minijinja::context;
 use ulid::Ulid;
 
 use domain::{get_paper, show_voting, store_votes};
 
-use crate::controllers::MeetUpPresenter;
 use crate::{app::AppState, controllers::UserPresenter, extractors::LoggedUser};
+use crate::controllers::MeetUpPresenter;
 
 use super::HtmlError;
 
@@ -26,7 +26,7 @@ pub async fn voting(
         &state.database_gateway,
         &user.0.id,
     )
-    .await?;
+        .await?;
 
     let context = context! {
         user => UserPresenter::from(user.0),
@@ -54,14 +54,14 @@ pub async fn store_vote(
         &user.0.id,
         form.into_iter().map(|(_, paper_id)| paper_id).collect(),
     )
-    .await?;
+        .await?;
     let (future_meet_up, papers) = show_voting(
         &state.database_gateway,
         &state.database_gateway,
         &state.database_gateway,
         &user.0.id,
     )
-    .await?;
+        .await?;
     let context = context! {
         user => UserPresenter::from(user.0),
         client_id => state.github_client_id.clone(),

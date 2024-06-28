@@ -1,12 +1,14 @@
-use crate::error_and_log;
 use chrono::{NaiveDate, Utc};
+use sqlx::{Error, Row, sqlite::SqliteRow};
+use ulid::Ulid;
+use url::Url;
+
 use domain::{
     GetFutureMeetUpError, GetMeetUpError, ListPastMeetUpsError, MeetUp, MeetUpGateway,
     MeetUpMetadata, MeetUpState, NewMeetUpError, Paper, UpdateMeetUpError,
 };
-use sqlx::{sqlite::SqliteRow, Error, Row};
-use ulid::Ulid;
-use url::Url;
+
+use crate::error_and_log;
 
 use super::SqliteDatabaseGateway;
 
@@ -15,21 +17,9 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         let result = sqlx::query(
             "SELECT mu.*, p.id as paper_id, p.title, p.description, p.speaker, p.user_id, p.email FROM meet_ups mu LEFT JOIN papers p ON p.id = mu.paper_id WHERE mu.state != 3;",
         )
-        .try_map(|row: SqliteRow| {
-            let state = state_from_row(&row)?;
-            Ok(MeetUp::new(
-                Ulid::from_bytes(
-                    row.try_get::<&[u8], _>("id")?
-                        .try_into()
-                        .map_err(|err| Error::Decode(Box::new(err)))?,
-                ),
-                state,
-                row.get("location"),
-                row.get("date"),
-            ))
-        })
-        .fetch_one(&self.sqlite_pool)
-        .await;
+            .try_map(meet_up_from_sqlite_row)
+            .fetch_one(&self.sqlite_pool)
+            .await;
         match result {
             Ok(future_meet_up) => Ok(Some(future_meet_up)),
             Err(Error::RowNotFound) => Ok(None),
@@ -85,13 +75,13 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         let rows_affected = sqlx::query(
             "UPDATE meet_ups SET state = 2, paper_id = ?, updated_at = ? WHERE id = ? AND state = 1",
         )
-        .bind(paper_id.to_bytes().as_slice())
-        .bind(Utc::now())
-        .bind(id.to_bytes().as_slice())
-        .execute(&self.sqlite_pool)
-        .await
-        .map_err(|err| UpdateMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?
-        .rows_affected();
+            .bind(paper_id.to_bytes().as_slice())
+            .bind(Utc::now())
+            .bind(id.to_bytes().as_slice())
+            .execute(&self.sqlite_pool)
+            .await
+            .map_err(|err| UpdateMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?
+            .rows_affected();
         let meet_up = self
             .get_future_meet_up()
             .await
@@ -108,13 +98,13 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         let rows_affected = sqlx::query(
             "UPDATE meet_ups SET state = 3, link = ?, updated_at = ? WHERE id = ? AND state = 2",
         )
-        .bind(link.as_str())
-        .bind(Utc::now())
-        .bind(id.to_bytes().as_slice())
-        .execute(&self.sqlite_pool)
-        .await
-        .map_err(|err| UpdateMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?
-        .rows_affected();
+            .bind(link.as_str())
+            .bind(Utc::now())
+            .bind(id.to_bytes().as_slice())
+            .execute(&self.sqlite_pool)
+            .await
+            .map_err(|err| UpdateMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?
+            .rows_affected();
         if rows_affected == 0 {
             return Err(UpdateMeetUpError::InvalidState);
         }
@@ -145,26 +135,14 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         sqlx::query(
             "SELECT mu.id, mu.paper_id, mu.state, p.user_id, p.title, p.description, p.speaker, p.email, mu.date, mu.link, mu.location FROM meet_ups mu JOIN papers p ON mu.paper_id = p.id WHERE mu.id = ?",
         )
-        .bind(id.to_bytes().as_slice())
-        .try_map(|row: SqliteRow| {
-            let state = state_from_row(&row)?;
-            Ok(MeetUp::new(
-                Ulid::from_bytes(
-                    row.try_get::<&[u8], _>("id")?
-                        .try_into()
-                        .map_err(|err| Error::Decode(Box::new(err)))?,
-                ),
-                state,
-                row.get("location"),
-                row.get("date"),
-            ))
-        })
-        .fetch_one(&self.sqlite_pool)
-        .await
-        .map_err(|err| match err {
-            Error::RowNotFound => GetMeetUpError::NotFound(id),
-            _ => GetMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")),
-        })
+            .bind(id.to_bytes().as_slice())
+            .try_map(meet_up_from_sqlite_row)
+            .fetch_one(&self.sqlite_pool)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => GetMeetUpError::NotFound(id),
+                _ => GetMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")),
+            })
     }
 
     async fn get_meet_up_metadata(&self, id: Ulid) -> Result<MeetUpMetadata, GetMeetUpError> {
@@ -189,7 +167,19 @@ impl MeetUpGateway for SqliteDatabaseGateway {
             })
     }
 }
-
+fn meet_up_from_sqlite_row(row: SqliteRow) -> Result<MeetUp, Error> {
+    let state = state_from_row(&row)?;
+    Ok(MeetUp::new(
+        Ulid::from_bytes(
+            row.try_get::<&[u8], _>("id")?
+                .try_into()
+                .map_err(|err| Error::Decode(Box::new(err)))?,
+        ),
+        state,
+        row.get("location"),
+        row.get("date"),
+    ))
+}
 fn state_from_row(row: &SqliteRow) -> Result<MeetUpState, Error> {
     Ok(match row.get::<i32, _>("state") {
         0 => MeetUpState::CallForPapers,

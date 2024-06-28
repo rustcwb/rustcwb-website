@@ -3,13 +3,14 @@ use std::sync::Arc;
 use axum::{
     extract::State,
     response::Html,
-    routing::{get, post},
     Router,
+    routing::{get, post},
 };
 use axum_htmx::HxRequest;
+use minijinja::context;
+
 use domain::show_admin_page;
 use meet_up::{create_meet_up, finish, go_for_voting, schedule};
-use minijinja::context;
 
 use crate::{app::AppState, controllers::MeetUpPresenter, extractors::AdminUser};
 

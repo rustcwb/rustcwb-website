@@ -1,14 +1,15 @@
 use std::sync::Arc;
 
-use axum::{extract::State, response::Html, Form};
+use axum::{extract::State, Form, response::Html};
 use chrono::NaiveDate;
+use minijinja::context;
+use serde::Deserialize;
+use url::Url;
+
 use domain::{
     create_new_meet_up, move_future_meet_up_to_past_meet_up, move_future_meet_up_to_scheduled,
     move_future_meet_up_to_voting,
 };
-use minijinja::context;
-use serde::Deserialize;
-use url::Url;
 
 use crate::{
     app::AppState,

@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use axum::{extract::State, response::Html};
 use axum_htmx::HxRequest;
-use domain::show_home_page;
 use minijinja::context;
+
+use domain::show_home_page;
 
 use crate::{
     app::AppState,

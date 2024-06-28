@@ -1,8 +1,9 @@
 use axum::response::{Html, IntoResponse};
 use chrono::NaiveDate;
-use domain::{MeetUp, MeetUpState, User};
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
+
+use domain::{MeetUp, MeetUpState, User};
 
 pub mod admin;
 pub mod call_for_papers;

@@ -7,8 +7,9 @@ use axum::{
 };
 use axum_extra::extract::{cookie::Cookie, CookieJar};
 use axum_htmx::HxRequest;
-use domain::login_with_github_code;
 use minijinja::context;
+
+use domain::login_with_github_code;
 
 use crate::{app::AppState, controllers::UserPresenter, extractors::MaybeUser};
 

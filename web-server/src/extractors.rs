@@ -6,13 +6,14 @@ use axum::{
     extract::FromRequestParts,
     http::{
         header::{AUTHORIZATION, WWW_AUTHENTICATE},
-        request::Parts,
-        HeaderMap, HeaderName, StatusCode,
+        HeaderMap,
+        HeaderName, request::Parts, StatusCode,
     },
     response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::extract::CookieJar;
-use base64::{prelude::BASE64_STANDARD, Engine};
+use base64::{Engine, prelude::BASE64_STANDARD};
+
 use domain::{login_with_access_token, User};
 
 use crate::app::AppState;
@@ -76,8 +77,8 @@ impl FromRequestParts<Arc<AppState>> for MaybeUser {
                     &state.github_gateway,
                     access_token,
                 )
-                .await
-                .ok();
+                    .await
+                    .ok();
                 Ok(MaybeUser(user))
             }
             None => Ok(MaybeUser(None)),
