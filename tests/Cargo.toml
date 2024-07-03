@@ -3,13 +3,26 @@ name = "tests"
 version = "0.1.0"
 edition = "2021"
 
-[dev-dependencies]
+[dependencies]
 tokio = { version = "1.0", features = ["macros"] }
 domain = { path = "../domain" }
 gateway = { path = "../gateway" }
 anyhow = "1"
-
+chrono = { version = "0.4.38" }
+ulid = { version = "1.1.2" }
 
 [[test]]
-name = "get_meet_up"
-path = "get_meet_up_test.rs"
+name = "meet_up"
+path = "meet_up_test.rs"
+
+[[test]]
+name = "show_admin_page_test"
+path = "show_admin_page_test.rs"
+
+[[test]]
+name = "show_home_page_test"
+path = "show_home_page_test.rs"
+
+[[test]]
+name = "voting_test"
+path = "voting_test.rs"

@@ -2,8 +2,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
-use axum::Router;
 use axum::routing::{get, post};
+use axum::Router;
 use minijinja::Environment;
 use tower_http::services::ServeDir;
 

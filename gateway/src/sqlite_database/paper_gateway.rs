@@ -1,4 +1,4 @@
-use sqlx::{Error, Row, sqlite::SqliteRow};
+use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
 
 use domain::{GetPaperError, Paper, PaperGateway, StorePaperError};
@@ -8,8 +8,8 @@ use crate::{error_and_log, SqliteDatabaseGateway};
 impl PaperGateway for SqliteDatabaseGateway {
     async fn store_paper_with_meet_up(
         &self,
-        paper: Paper,
-        meet_up_id: Ulid,
+        paper: &Paper,
+        meet_up_id: &Ulid,
         limit: u8,
     ) -> Result<(), StorePaperError> {
         let mut transaction = self
@@ -19,10 +19,10 @@ impl PaperGateway for SqliteDatabaseGateway {
             .map_err(|err| error_and_log!("SQLX Error: {err}"))?;
         sqlx::query("INSERT INTO papers (id, title, description, speaker, email, user_id) VALUES (?, ?, ?, ?, ?, ?);")
             .bind(paper.id.to_bytes().as_slice())
-            .bind(paper.title)
-            .bind(paper.description)
-            .bind(paper.speaker)
-            .bind(paper.email)
+            .bind(&paper.title)
+            .bind(&paper.description)
+            .bind(&paper.speaker)
+            .bind(&paper.email)
             .bind(paper.user_id.to_bytes().as_slice())
             .execute(&mut *transaction).await.map_err(|err| error_and_log!("SQLX Error: {err}"))?;
         sqlx::query("INSERT INTO meet_up_papers (meet_up_id, paper_id) VALUES (?, ?);")

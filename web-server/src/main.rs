@@ -26,9 +26,9 @@ async fn main() -> Result<()> {
         (var("ADMIN_USER")?, var("ADMIN_PASSWORD")?),
         (var("GITHUB_CLIENT_ID")?, var("GITHUB_CLIENT_SECRET")?),
     )
-        .await?
-        .layer(CompressionLayer::new())
-        .layer(TraceLayer::new_for_http());
+    .await?
+    .layer(CompressionLayer::new())
+    .layer(TraceLayer::new_for_http());
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3001").await?;
     tracing::info!("Listening to new connections");

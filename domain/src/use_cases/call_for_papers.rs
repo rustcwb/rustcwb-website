@@ -41,7 +41,7 @@ pub async fn submit_paper(
     }
 
     paper_gateway
-        .store_paper_with_meet_up(paper, future_meet_up.id, MAX_PAPERS_PER_USER_PER_MEET_UP)
+        .store_paper_with_meet_up(&paper, &future_meet_up.id, MAX_PAPERS_PER_USER_PER_MEET_UP)
         .await
         .map_err(|err| match err {
             StorePaperError::MoreThanLimitPapersPerUserPerMeetUp(limit) => {

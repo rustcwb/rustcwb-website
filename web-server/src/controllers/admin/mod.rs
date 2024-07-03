@@ -3,8 +3,8 @@ use std::sync::Arc;
 use axum::{
     extract::State,
     response::Html,
-    Router,
     routing::{get, post},
+    Router,
 };
 use axum_htmx::HxRequest;
 use minijinja::context;

@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 use url::Url;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MeetUpMetadata {
-    id: Ulid,
-    title: String,
-    date: NaiveDate,
+    pub id: Ulid,
+    pub title: String,
+    pub date: NaiveDate,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

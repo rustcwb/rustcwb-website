@@ -131,16 +131,16 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         )
     }
 
-    async fn get_meet_up(&self, id: Ulid) -> Result<MeetUp, GetMeetUpError> {
+    async fn get_meet_up(&self, id: &Ulid) -> Result<MeetUp, GetMeetUpError> {
         sqlx::query(
-            "SELECT mu.id, mu.paper_id, mu.state, p.user_id, p.title, p.description, p.speaker, p.email, mu.date, mu.link, mu.location FROM meet_ups mu JOIN papers p ON mu.paper_id = p.id WHERE mu.id = ?",
+            "SELECT mu.id, mu.paper_id, mu.state, p.user_id, p.title, p.description, p.speaker, p.email, mu.date, mu.link, mu.location FROM meet_ups mu LEFT JOIN papers p ON mu.paper_id = p.id WHERE mu.id = ?",
         )
             .bind(id.to_bytes().as_slice())
             .try_map(meet_up_from_sqlite_row)
             .fetch_one(&self.sqlite_pool)
             .await
             .map_err(|err| match err {
-                Error::RowNotFound => GetMeetUpError::NotFound(id),
+                Error::RowNotFound => GetMeetUpError::NotFound(*id),
                 _ => GetMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")),
             })
     }

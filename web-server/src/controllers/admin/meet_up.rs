@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use axum::{extract::State, Form, response::Html};
+use axum::{extract::State, response::Html, Form};
 use chrono::NaiveDate;
 use minijinja::context;
 use serde::Deserialize;
 use url::Url;
 
 use domain::{
-    create_new_meet_up, move_future_meet_up_to_past_meet_up, move_future_meet_up_to_scheduled,
+    create_new_meet_up, move_future_meet_up_to_done, move_future_meet_up_to_scheduled,
     move_future_meet_up_to_voting,
 };
 
@@ -81,7 +81,7 @@ pub async fn finish(
     let tmpl = state
         .get_minijinja_env()
         .get_template("components/admin/future_meet_up/future_meet_up")?;
-    move_future_meet_up_to_past_meet_up(&state.database_gateway, params.link).await?;
+    move_future_meet_up_to_done(&state.database_gateway, params.link).await?;
 
     let context = context! {
         client_id => state.github_client_id.clone(),

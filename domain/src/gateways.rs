@@ -24,7 +24,7 @@ pub enum GetMeetUpError {
 pub trait MeetUpGateway {
     async fn get_future_meet_up(&self) -> Result<Option<MeetUp>, GetFutureMeetUpError>;
     async fn list_past_meet_ups(&self) -> Result<Vec<MeetUpMetadata>, ListPastMeetUpsError>;
-    async fn get_meet_up(&self, id: Ulid) -> Result<MeetUp, GetMeetUpError>;
+    async fn get_meet_up(&self, id: &Ulid) -> Result<MeetUp, GetMeetUpError>;
     async fn get_meet_up_metadata(
         &self,
         id: Ulid,
@@ -122,8 +122,8 @@ pub enum ExchangeCodeError {
 pub trait PaperGateway {
     async fn store_paper_with_meet_up(
         &self,
-        paper: Paper,
-        meet_up_id: Ulid,
+        paper: &Paper,
+        meet_up_id: &Ulid,
         limit: u8,
     ) -> Result<(), StorePaperError>;
     async fn get_paper(&self, id: &Ulid) -> Result<Paper, GetPaperError>;
@@ -133,7 +133,7 @@ pub trait PaperGateway {
         meet_up_id: &Ulid,
     ) -> Result<Vec<Paper>, GetPaperError>;
     async fn get_papers_from_meet_up(&self, meet_up_id: &Ulid)
-                                     -> Result<Vec<Paper>, GetPaperError>;
+        -> Result<Vec<Paper>, GetPaperError>;
 }
 
 #[derive(Debug, Error)]

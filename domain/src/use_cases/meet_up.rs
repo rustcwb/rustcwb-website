@@ -54,7 +54,7 @@ pub async fn move_future_meet_up_to_scheduled(
         .await?)
 }
 
-pub async fn move_future_meet_up_to_past_meet_up(
+pub async fn move_future_meet_up_to_done(
     gateway: &impl MeetUpGateway,
     link: Url,
 ) -> anyhow::Result<()> {
@@ -76,11 +76,7 @@ pub async fn get_meet_up(
     gateway: &impl MeetUpGateway,
     id: Ulid,
 ) -> Result<MeetUp, GetPastMeetUpError> {
-    let meet_up = gateway.get_meet_up(id).await?;
-    if !matches!(meet_up.state, MeetUpState::Done { .. }) {
-        return Err(GetPastMeetUpError::NotDone);
-    }
-    Ok(meet_up)
+    Ok(gateway.get_meet_up(&id).await?)
 }
 
 pub async fn get_meet_up_metadata(
@@ -98,8 +94,6 @@ pub async fn get_future_meet_up(
 
 #[derive(Debug, Error)]
 pub enum GetPastMeetUpError {
-    #[error("Meet up is not done")]
-    NotDone,
     #[error("Meet up with `{0} not found")]
     NotFound(Ulid),
     #[error("Unknown error: `{0}`")]
@@ -109,7 +103,7 @@ pub enum GetPastMeetUpError {
 impl From<GetMeetUpError> for GetPastMeetUpError {
     fn from(err: GetMeetUpError) -> Self {
         match err {
-            GetMeetUpError::NotFound(ulid) => GetPastMeetUpError::NotFound(ulid),
+            GetMeetUpError::NotFound(id) => GetPastMeetUpError::NotFound(id),
             err => GetPastMeetUpError::Unknown(err.into()),
         }
     }
