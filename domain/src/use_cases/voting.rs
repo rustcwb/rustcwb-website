@@ -14,7 +14,7 @@ pub async fn show_voting(
     let future_meet_up = meet_up_gateway
         .get_future_meet_up()
         .await?
-        .ok_or(anyhow!("No meet up found"))?;
+        .ok_or(anyhow!("No future meetups found"))?;
     if future_meet_up.state != MeetUpState::Voting {
         return Err(anyhow!("Invalid meet up state: {:?}", future_meet_up.state));
     }

@@ -1,10 +1,10 @@
-use chrono::Utc;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
 use serde::Deserialize;
 
 use domain::{
     AccessToken, ExchangeCodeError, GithubGateway, RefreshTokenError, UserInfoGithubError,
 };
+use shared::utc_now;
 
 use crate::error_and_log;
 
@@ -87,11 +87,11 @@ impl GithubGateway for GithubRestGateway {
         Ok((
             AccessToken::new(
                 response.access_token,
-                Utc::now() + chrono::Duration::seconds(response.expires_in),
+                utc_now() + chrono::Duration::seconds(response.expires_in),
             ),
             AccessToken::new(
                 response.refresh_token,
-                Utc::now() + chrono::Duration::seconds(response.refresh_token_expires_in),
+                utc_now() + chrono::Duration::seconds(response.refresh_token_expires_in),
             ),
         ))
     }
@@ -122,11 +122,11 @@ impl GithubGateway for GithubRestGateway {
         Ok((
             AccessToken::new(
                 response.access_token,
-                Utc::now() + chrono::Duration::seconds(response.expires_in),
+                utc_now() + chrono::Duration::seconds(response.expires_in),
             ),
             AccessToken::new(
                 response.refresh_token,
-                Utc::now() + chrono::Duration::seconds(response.refresh_token_expires_in),
+                utc_now() + chrono::Duration::seconds(response.refresh_token_expires_in),
             ),
         ))
     }

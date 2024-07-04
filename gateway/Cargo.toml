@@ -2,6 +2,7 @@
 name = "gateway"
 version = "0.1.0"
 edition = "2021"
+resolver = "2"
 
 [dependencies]
 sqlx = { version = "0.7", features = [
@@ -12,6 +13,7 @@ sqlx = { version = "0.7", features = [
 ] }
 anyhow = "1"
 domain = { path = "../domain" }
+shared = { path = "../shared" }
 chrono = { version = "0.4.38", features = ["serde"] }
 ulid = { version = "1.1.2", features = ["serde"] }
 url = { version = "2.5.1", features = ["serde"] }
@@ -22,3 +24,4 @@ tracing = "0.1.40"
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["macros"] }
+shared = { path = "../shared", features = ["test_features"] }

@@ -1,7 +1,8 @@
-use sqlx::{sqlite::SqliteRow, Error, Row};
+use sqlx::{Error, Row, sqlite::SqliteRow};
 use ulid::Ulid;
 
 use domain::{AccessToken, GetUserError, LoginMethod, StoreUserError, User, UserGateway};
+use shared::utc_now;
 
 use crate::error_and_log;
 
@@ -25,14 +26,14 @@ impl UserGateway for SqliteDatabaseGateway {
             JOIN github_logins gl ON u.id = gl.user_id
             WHERE u.access_token = ?"#,
         )
-        .bind(access_token)
-        .try_map(user_from_row)
-        .fetch_one(&self.sqlite_pool)
-        .await
-        .map_err(|err| match err {
-            Error::RowNotFound => GetUserError::NotFound,
-            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
-        })
+            .bind(access_token)
+            .try_map(user_from_row)
+            .fetch_one(&self.sqlite_pool)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => GetUserError::NotFound,
+                _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
+            })
     }
 
     async fn store_user(&self, user: User) -> Result<User, StoreUserError> {
@@ -46,13 +47,16 @@ impl UserGateway for SqliteDatabaseGateway {
             .begin()
             .await
             .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
-        sqlx::query("INSERT INTO users (id, nickname, email, access_token, expires_at, login_method) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET nickname = EXCLUDED.nickname, email = EXCLUDED.email, access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, login_method = EXCLUDED.login_method")
+        let now = utc_now();
+        sqlx::query("INSERT INTO users (id, nickname, email, access_token, expires_at, login_method, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ? ,?) ON CONFLICT (id) DO UPDATE SET nickname = EXCLUDED.nickname, email = EXCLUDED.email, access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, login_method = EXCLUDED.login_method, updated_at = EXCLUDED.updated_at")
             .bind(user_id)
             .bind(&user.nickname)
             .bind(&user.email)
             .bind(user.access_token.token())
             .bind(user.access_token.expire_at())
             .bind(login_method)
+            .bind(now)
+            .bind(now)
             .execute(&mut *transaction)
             .await
             .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
@@ -61,13 +65,15 @@ impl UserGateway for SqliteDatabaseGateway {
                 access_token,
                 refresh_token,
             } => {
-                sqlx::query("INSERT INTO github_logins (id, user_id, access_token, expires_at, refresh_token, refresh_token_expires_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, refresh_token = EXCLUDED.refresh_token, refresh_token_expires_at = EXCLUDED.refresh_token_expires_at")
+                sqlx::query("INSERT INTO github_logins (id, user_id, access_token, expires_at, refresh_token, refresh_token_expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET access_token = EXCLUDED.access_token, expires_at = EXCLUDED.expires_at, refresh_token = EXCLUDED.refresh_token, refresh_token_expires_at = EXCLUDED.refresh_token_expires_at, updated_at = EXCLUDED.updated_at")
                     .bind(Ulid::new().to_bytes().as_slice())
                     .bind(user_id)
                     .bind(access_token.token())
                     .bind(access_token.expire_at())
                     .bind(refresh_token.token())
                     .bind(refresh_token.expire_at())
+                    .bind(now)
+                    .bind(now)
                     .execute(&mut *transaction)
                     .await
                     .map_err(|err| StoreUserError::Unknown(error_and_log!("SQLX Error: {err}")))?;
@@ -97,14 +103,14 @@ impl UserGateway for SqliteDatabaseGateway {
             JOIN github_logins gl ON u.id = gl.user_id
             WHERE u.email = ?"#,
         )
-        .bind(email)
-        .try_map(user_from_row)
-        .fetch_one(&self.sqlite_pool)
-        .await
-        .map_err(|err| match err {
-            Error::RowNotFound => GetUserError::NotFound,
-            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
-        })
+            .bind(email)
+            .try_map(user_from_row)
+            .fetch_one(&self.sqlite_pool)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => GetUserError::NotFound,
+                _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
+            })
     }
 }
 

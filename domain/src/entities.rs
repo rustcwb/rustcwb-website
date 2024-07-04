@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 use url::Url;
 
+use shared::utc_now;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MeetUpMetadata {
     pub id: Ulid,
@@ -94,7 +96,7 @@ impl AccessToken {
     pub fn generate_new() -> Self {
         Self {
             token: Alphanumeric.sample_string(&mut rand::thread_rng(), 32),
-            expire_at: Utc::now() + chrono::Duration::days(1),
+            expire_at: utc_now() + chrono::Duration::days(1),
         }
     }
 
@@ -103,7 +105,7 @@ impl AccessToken {
     }
 
     pub fn is_expired(&self) -> bool {
-        Utc::now() > self.expire_at
+        utc_now() > self.expire_at
     }
 
     pub fn token(&self) -> &str {

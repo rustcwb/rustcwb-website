@@ -2,8 +2,10 @@
 name = "domain"
 version = "0.1.0"
 edition = "2021"
+resolver = "2"
 
 [dependencies]
+shared = { path = "../shared" }
 serde = { version = "1", features = ["derive"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 ulid = { version = "1.1.2", features = ["serde"] }
@@ -11,3 +13,6 @@ url = { version = "2.5.1", features = ["serde"] }
 thiserror = "1"
 anyhow = "1"
 rand = "0.8.5"
+
+[dev-dependencies]
+shared = { path = "../shared", features = ["test_features"] }

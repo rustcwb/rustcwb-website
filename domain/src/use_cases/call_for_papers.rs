@@ -12,15 +12,21 @@ pub async fn show_call_for_papers(
     meet_up_gateway: &impl MeetUpGateway,
     user: &User,
 ) -> anyhow::Result<(MeetUp, Vec<Paper>, bool)> {
-    let future_meet_up = meet_up_gateway
+    let meet_up = meet_up_gateway
         .get_future_meet_up()
         .await?
         .ok_or_else(|| anyhow::anyhow!("No future meetups found"))?;
+    if meet_up.state != MeetUpState::CallForPapers {
+        return Err(anyhow::anyhow!(
+            "Invalid meet up state: {:?}",
+            meet_up.state
+        ));
+    }
     let papers = paper_gateway
-        .get_papers_from_user_and_meet_up(&user.id, &future_meet_up.id)
+        .get_papers_from_user_and_meet_up(&user.id, &meet_up.id)
         .await?;
     let is_limit_of_papers_sent = papers.len() as u8 >= MAX_PAPERS_PER_USER_PER_MEET_UP;
-    Ok((future_meet_up, papers, is_limit_of_papers_sent))
+    Ok((meet_up, papers, is_limit_of_papers_sent))
 }
 
 pub async fn submit_paper(
@@ -60,11 +66,11 @@ pub async fn get_paper(
 
 #[derive(Debug, Error)]
 pub enum SubmitPaperError {
-    #[error("Invalid meet up state: `{0}`")]
+    #[error("Invalid meet up state: {0}")]
     InvalidMeetUpState(Box<MeetUpState>),
     #[error("No future meetups found")]
     NoFutureMeetUpFound,
-    #[error("More than limit papaers per user per meetups. Limit is `{0}`")]
+    #[error("More than limit papers per user per meetups. Limit is `{0}`")]
     MoreThanLimitPapersPerUserPerMeetUp(u8),
     #[error("Unknown error: `{0}`")]
     Unknown(#[from] anyhow::Error),

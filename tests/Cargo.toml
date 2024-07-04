@@ -2,14 +2,18 @@
 name = "tests"
 version = "0.1.0"
 edition = "2021"
+resolver = "2"
 
 [dependencies]
 tokio = { version = "1.0", features = ["macros"] }
 domain = { path = "../domain" }
 gateway = { path = "../gateway" }
+shared = { path = "../shared", features = ["test_features"] }
 anyhow = "1"
 chrono = { version = "0.4.38" }
 ulid = { version = "1.1.2" }
+assertables = "7.0.1"
+fake = "2.9.2"
 
 [[test]]
 name = "meet_up"
@@ -26,3 +30,11 @@ path = "show_home_page_test.rs"
 [[test]]
 name = "voting_test"
 path = "voting_test.rs"
+
+[[test]]
+name = "call_for_papers_test"
+path = "call_for_papers_test.rs"
+
+[[test]]
+name = "login_test"
+path = "login_test.rs"

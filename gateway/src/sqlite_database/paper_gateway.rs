@@ -45,9 +45,7 @@ impl PaperGateway for SqliteDatabaseGateway {
                 .rollback()
                 .await
                 .map_err(|err| error_and_log!("SQLX Error: {err}"))?;
-            return Err(StorePaperError::MoreThanLimitPapersPerUserPerMeetUp(
-                n_papers_for_user,
-            ));
+            return Err(StorePaperError::MoreThanLimitPapersPerUserPerMeetUp(limit));
         }
         transaction
             .commit()
@@ -89,7 +87,7 @@ impl PaperGateway for SqliteDatabaseGateway {
         &self,
         meet_up_id: &Ulid,
     ) -> Result<Vec<Paper>, GetPaperError> {
-        let result = sqlx::query("SELECT * FROM papers p JOIN meet_up_papers mup ON p.id = mup.paper_id WHERE mup.meet_up_id = ?")
+        let result = sqlx::query("SELECT * FROM papers p JOIN meet_up_papers mup ON p.id = mup.paper_id WHERE mup.meet_up_id = ? ORDER BY p.id")
             .bind(meet_up_id.to_bytes().as_slice())
             .try_map(paper_from_row)
             .fetch_all(&self.sqlite_pool)

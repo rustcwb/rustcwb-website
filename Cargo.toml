@@ -2,4 +2,4 @@
 
 resolver = "2"
 
-members = ["domain", "gateway", "tests", "web-server"]
+members = ["domain", "gateway", "shared", "tests", "web-server"]

@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, Utc};
+use chrono::NaiveDate;
 use sqlx::{Error, Row, sqlite::SqliteRow};
 use ulid::Ulid;
 use url::Url;
@@ -7,6 +7,7 @@ use domain::{
     GetFutureMeetUpError, GetMeetUpError, ListPastMeetUpsError, MeetUp, MeetUpGateway,
     MeetUpMetadata, MeetUpState, NewMeetUpError, Paper, UpdateMeetUpError,
 };
+use shared::utc_now;
 
 use crate::error_and_log;
 
@@ -49,7 +50,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
     async fn update_meet_up_to_voting(&self, id: &Ulid) -> Result<MeetUp, UpdateMeetUpError> {
         let rows_affected =
             sqlx::query("UPDATE meet_ups SET state = 1, updated_at = ? WHERE id = ? AND state = 0")
-                .bind(Utc::now())
+                .bind(utc_now())
                 .bind(id.to_bytes().as_slice())
                 .execute(&self.sqlite_pool)
                 .await
@@ -76,7 +77,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
             "UPDATE meet_ups SET state = 2, paper_id = ?, updated_at = ? WHERE id = ? AND state = 1",
         )
             .bind(paper_id.to_bytes().as_slice())
-            .bind(Utc::now())
+            .bind(utc_now())
             .bind(id.to_bytes().as_slice())
             .execute(&self.sqlite_pool)
             .await
@@ -99,7 +100,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
             "UPDATE meet_ups SET state = 3, link = ?, updated_at = ? WHERE id = ? AND state = 2",
         )
             .bind(link.as_str())
-            .bind(Utc::now())
+            .bind(utc_now())
             .bind(id.to_bytes().as_slice())
             .execute(&self.sqlite_pool)
             .await

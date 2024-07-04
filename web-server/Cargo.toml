@@ -2,10 +2,12 @@
 name = "web-server"
 version = "0.1.0"
 edition = "2021"
+resolver = "2"
 
 [dependencies]
 gateway = { path = "../gateway" }
 domain = { path = "../domain" }
+shared = { path = "../shared" }
 anyhow = "1"
 axum = { version = "0.7" }
 axum-htmx = "0.5"
@@ -28,3 +30,6 @@ url = { version = "2.5.1", features = ["serde"] }
 async-trait = "0.1.80"
 base64 = "0.22.1"
 axum-extra = { version = "0.9.3", features = ["cookie"] }
+
+[dev-dependencies]
+shared = { path = "../shared", features = ["test_features"] }

@@ -1,8 +1,8 @@
-use chrono::Utc;
-use sqlx::{sqlite::SqliteRow, Error, Row};
+use sqlx::{Error, Row, sqlite::SqliteRow};
 use ulid::Ulid;
 
 use domain::{Vote, VoteError, VoteGateway};
+use shared::utc_now;
 
 use crate::{error_and_log, SqliteDatabaseGateway};
 
@@ -14,7 +14,7 @@ impl VoteGateway for SqliteDatabaseGateway {
             .await
             .map_err(|err| error_and_log!("SQLX Error: `{err}`"))?;
         for vote in votes {
-            let now = Utc::now();
+            let now = utc_now();
             sqlx::query(
                 r#"
                 INSERT INTO meet_up_papers_votes (user_id, paper_id, meet_up_id, vote, created_at, updated_at)
