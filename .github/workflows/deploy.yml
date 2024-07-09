@@ -19,25 +19,10 @@ jobs:
           target: x86_64-unknown-linux-gnu
           args: "--locked --release"
           strip: true
-
-      #      - uses: actions/checkout@master
-#      - name: Compile
-#        uses: rust-build/rust-build.action@v1.4.4
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          SRC_DIR: ./web-server
-#          UPLOAD_MODE: none
-#          TOOLCHAIN_VERSION: stable
-#          RUSTTARGET: x86_64-unknown-linux-musl
-#          ARCHIVE_TYPES: tar.gz
-#          MINIFY: true
-#          EXTRA_FILES: "./web-server/public/"
-##      - uses: actions/checkout@master
       - name: Compress public dir
         run: tar -czf public.tar.gz web-server/public
       - name: Compress binary
-        run: tar -czf binary.tar.gz target/release/rustcwb
+        run: tar -czf binary.tar.gz target/x86_64-unknown-linux-gnu/release/rustcwb
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
