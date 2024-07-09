@@ -16,6 +16,7 @@ jobs:
         with:
           SRC_DIR: ./web-server
           UPLOAD_MODE: none
+          TOOLCHAIN_VERSION: stable
           RUSTTARGET: x86_64-unknown-linux-musl
           ARCHIVE_TYPES: tar.gz
       - uses: actions/checkout@master
