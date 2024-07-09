@@ -40,6 +40,6 @@ jobs:
           script: |
             cd /app
             tar -xzf *.tar.gz
-            rm *.tar.gz
+#            rm *.tar.gz
             killall web-server
             ./web-server &
