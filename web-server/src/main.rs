@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
         .finish();
     tracing::subscriber::set_global_default(subscriber)?;
     let app = build_app(
-        "web-server/public",
+        var("PUBLIC_FILES_FOLDER")?,
         var("DATABASE_URL")?,
         (var("ADMIN_USER")?, var("ADMIN_PASSWORD")?),
         (var("GITHUB_CLIENT_ID")?, var("GITHUB_CLIENT_SECRET")?),

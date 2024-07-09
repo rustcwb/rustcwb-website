@@ -38,3 +38,7 @@ path = "call_for_papers_test.rs"
 [[test]]
 name = "login_test"
 path = "login_test.rs"
+
+[[test]]
+name = "meet_up_goers_test"
+path = "meet_up_goers_test.rs"

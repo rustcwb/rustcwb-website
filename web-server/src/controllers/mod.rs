@@ -9,6 +9,7 @@ pub mod admin;
 pub mod call_for_papers;
 pub mod index;
 pub mod meet_up;
+pub mod meet_up_goers;
 pub mod user;
 pub mod voting;
 

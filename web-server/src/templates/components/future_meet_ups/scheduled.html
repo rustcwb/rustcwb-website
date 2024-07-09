@@ -9,10 +9,10 @@
 <address>Local: {{ future_meet_up.location }}</address>
 <p class="py-2">{{ future_meet_up.description }}</p>
 <p class="text-md py-2">
-    Para se inscrever
-    <a
-        class="underline transition ease-in-out duration-150 hover:text-rust"
-        href="#"
-        >click aqui</a
-    >. É gratuito.
+    Pedimos para que se possível se inscrever no botão a baixo. Isso nos ajuda a ter uma ideia de quantas pessoas vão
+    participar.
 </p>
+<div class="flex justify-center">
+    {% include 'components/future_meet_ups/register_button' %}
+</div>
+

@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use sqlx::{Error, Row, sqlite::SqliteRow};
+use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
 use url::Url;
 
@@ -99,13 +99,13 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         let rows_affected = sqlx::query(
             "UPDATE meet_ups SET state = 3, link = ?, updated_at = ? WHERE id = ? AND state = 2",
         )
-            .bind(link.as_str())
-            .bind(utc_now())
-            .bind(id.to_bytes().as_slice())
-            .execute(&self.sqlite_pool)
-            .await
-            .map_err(|err| UpdateMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?
-            .rows_affected();
+        .bind(link.as_str())
+        .bind(utc_now())
+        .bind(id.to_bytes().as_slice())
+        .execute(&self.sqlite_pool)
+        .await
+        .map_err(|err| UpdateMeetUpError::Unknown(error_and_log!("SQLX Error: {err}")))?
+        .rows_affected();
         if rows_affected == 0 {
             return Err(UpdateMeetUpError::InvalidState);
         }

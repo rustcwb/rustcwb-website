@@ -12,9 +12,10 @@ use minijinja::context;
 use domain::show_admin_page;
 use meet_up::{create_meet_up, finish, go_for_voting, schedule};
 
+use crate::extractors::MaybeUser;
 use crate::{app::AppState, controllers::MeetUpPresenter, extractors::AdminUser};
 
-use super::HtmlError;
+use super::{HtmlError, UserPresenter};
 
 pub mod meet_up;
 
@@ -29,16 +30,23 @@ pub fn admin_router() -> Router<Arc<AppState>> {
 
 pub async fn admin(
     _: AdminUser,
+    maybe_user: MaybeUser,
     HxRequest(is_hx_request): HxRequest,
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("admin")?;
-    let (future_meet_up, n_papers) =
-        show_admin_page(&state.database_gateway, &state.database_gateway).await?;
+    let meet_up_response = show_admin_page(
+        &state.database_gateway,
+        &state.database_gateway,
+        &state.database_gateway,
+    )
+    .await?;
 
     let context = context! {
-        future_meet_up => future_meet_up.map(MeetUpPresenter::from),
-        n_papers => n_papers,
+        n_papers => meet_up_response.n_papers(),
+        n_attendees => meet_up_response.n_attendees(),
+        future_meet_up => meet_up_response.into_meet_up().map(MeetUpPresenter::from),
+        user => maybe_user.0.map(UserPresenter::from),
         client_id => state.github_client_id.clone(),
     };
     match is_hx_request {

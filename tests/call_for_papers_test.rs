@@ -1,7 +1,7 @@
 use assertables::{assert_contains, assert_contains_as_result};
 use ulid::Ulid;
 
-use domain::{get_paper, MeetUpState, show_call_for_papers, submit_paper};
+use domain::{get_paper, show_call_for_papers, submit_paper, MeetUpState};
 use shared::utc_now;
 use tests::{build_gateway, build_paper_with_user, create_meet_up, create_random_user};
 
@@ -26,7 +26,7 @@ async fn show_call_for_papers_with_wrong_state() -> anyhow::Result<()> {
         utc_now().naive_utc().date(),
         MeetUpState::Voting,
     )
-        .await?;
+    .await?;
     let err = show_call_for_papers(&gateway, &gateway, &user)
         .await
         .expect_err("Should error out");
@@ -44,7 +44,7 @@ async fn show_call_for_papers_without_papers() -> anyhow::Result<()> {
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
-        .await?;
+    .await?;
     let (show_meet_up, papers, over_the_limit) =
         show_call_for_papers(&gateway, &gateway, &user).await?;
     assert_eq!(meet_up, show_meet_up);
@@ -64,7 +64,7 @@ async fn show_call_for_papers_with_papers_but_less_than_limit() -> anyhow::Resul
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
-        .await?;
+    .await?;
     submit_paper(&gateway, &gateway, paper.clone()).await?;
     let (show_meet_up, papers, over_the_limit) =
         show_call_for_papers(&gateway, &gateway, &user).await?;
@@ -86,7 +86,7 @@ async fn show_call_for_papers_with_papers_at_limit() -> anyhow::Result<()> {
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
-        .await?;
+    .await?;
     submit_paper(&gateway, &gateway, paper_1.clone()).await?;
     submit_paper(&gateway, &gateway, paper_2.clone()).await?;
     let (show_meet_up, papers, over_the_limit) =
@@ -112,7 +112,7 @@ async fn show_call_for_papers_should_only_show_papers_from_correct_user() -> any
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
-        .await?;
+    .await?;
     submit_paper(&gateway, &gateway, paper_1.clone()).await?;
     submit_paper(&gateway, &gateway, paper_2.clone()).await?;
     let (show_meet_up, papers_1, over_the_limit) =
@@ -151,7 +151,7 @@ async fn submit_paper_with_invalid_state() -> anyhow::Result<()> {
         utc_now().naive_utc().date(),
         MeetUpState::Voting,
     )
-        .await?;
+    .await?;
     let err = submit_paper(&gateway, &gateway, paper)
         .await
         .expect_err("Should error out");
@@ -172,7 +172,7 @@ async fn submit_paper_over_limit_per_user() -> anyhow::Result<()> {
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
-        .await?;
+    .await?;
     submit_paper(&gateway, &gateway, paper_1).await?;
     submit_paper(&gateway, &gateway, paper_2).await?;
     let err = submit_paper(&gateway, &gateway, paper_3)
@@ -210,7 +210,7 @@ async fn get_paper_should_return_expected_paper() -> anyhow::Result<()> {
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
-        .await?;
+    .await?;
     submit_paper(&gateway, &gateway, paper.clone()).await?;
     assert_eq!(paper, get_paper(&gateway, &paper.id).await?);
     Ok(())

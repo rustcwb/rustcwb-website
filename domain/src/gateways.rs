@@ -167,3 +167,33 @@ pub enum VoteError {
     #[error("Unknown error: `{0}`")]
     Unknown(#[from] anyhow::Error),
 }
+
+pub trait MeetUpGoersGateway {
+    async fn register_user_to_meet_up(
+        &self,
+        user_id: &Ulid,
+        meet_up_id: &Ulid,
+    ) -> Result<(), RegisterUserError>;
+    async fn is_user_registered_to_meet_up(
+        &self,
+        user_id: &Ulid,
+        meet_up_id: &Ulid,
+    ) -> Result<bool, RegisterUserError>;
+
+    async fn get_number_attendees_from_meet_up(
+        &self,
+        meet_up_id: &Ulid,
+    ) -> Result<usize, GetAttendeesError>;
+}
+
+#[derive(Debug, Error)]
+pub enum RegisterUserError {
+    #[error("Unknown error: `{0}`")]
+    Unknown(#[from] anyhow::Error),
+}
+
+#[derive(Debug, Error)]
+pub enum GetAttendeesError {
+    #[error("Unknown error: `{0}`")]
+    Unknown(#[from] anyhow::Error),
+}

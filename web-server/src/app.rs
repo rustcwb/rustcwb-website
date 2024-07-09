@@ -14,6 +14,7 @@ use crate::controllers::admin::admin_router;
 use crate::controllers::call_for_papers::{call_for_papers, save_call_for_papers};
 use crate::controllers::index::index;
 use crate::controllers::meet_up::{meet_up, meet_up_metadata};
+use crate::controllers::meet_up_goers::register;
 use crate::controllers::user::{github_login, logout, user};
 use crate::controllers::voting::{paper_details, paper_no_details, store_vote, voting};
 
@@ -37,6 +38,7 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
         .route("/user", get(user))
         .route("/github/authorize", get(github_login))
         .route("/logout", get(logout))
+        .route("/register", post(register))
         .with_state(Arc::new(AppState::new(
             SqliteDatabaseGateway::new(&database_url).await?,
             GithubRestGateway::new(client_id.clone(), client_secret),
@@ -116,6 +118,10 @@ impl AppState {
         );
         add_template!(env, "templates/components/future_meet_ups/voting.html");
         add_template!(env, "templates/components/future_meet_ups/scheduled.html");
+        add_template!(
+            env,
+            "templates/components/future_meet_ups/register_button.html"
+        );
         Ok(Self {
             admin_details,
             github_gateway,

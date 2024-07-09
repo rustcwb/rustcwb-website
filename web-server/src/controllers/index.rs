@@ -20,10 +20,16 @@ pub async fn index(
     State(state): State<Arc<AppState>>,
 ) -> Result<Html<String>, HtmlError> {
     let tmpl = state.get_minijinja_env().get_template("home")?;
-    let (future_meet_up, past_meet_ups) = show_home_page(&state.database_gateway).await?;
+    let (future_meet_up, past_meet_ups, is_registered_user) = show_home_page(
+        &state.database_gateway,
+        &state.database_gateway,
+        maybe_user.0.as_ref().map(|user| &user.id),
+    )
+    .await?;
 
     let context = context! {
         user => maybe_user.0.map(UserPresenter::from),
+        registered_user => is_registered_user,
         client_id => state.github_client_id.clone(),
         future_meet_up => future_meet_up.map(MeetUpPresenter::from),
         past_meetups => past_meet_ups,

@@ -1,4 +1,4 @@
-use sqlx::{Error, Row, sqlite::SqliteRow};
+use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
 
 use domain::{AccessToken, GetUserError, LoginMethod, StoreUserError, User, UserGateway};
@@ -26,14 +26,14 @@ impl UserGateway for SqliteDatabaseGateway {
             JOIN github_logins gl ON u.id = gl.user_id
             WHERE u.access_token = ?"#,
         )
-            .bind(access_token)
-            .try_map(user_from_row)
-            .fetch_one(&self.sqlite_pool)
-            .await
-            .map_err(|err| match err {
-                Error::RowNotFound => GetUserError::NotFound,
-                _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
-            })
+        .bind(access_token)
+        .try_map(user_from_row)
+        .fetch_one(&self.sqlite_pool)
+        .await
+        .map_err(|err| match err {
+            Error::RowNotFound => GetUserError::NotFound,
+            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
+        })
     }
 
     async fn store_user(&self, user: User) -> Result<User, StoreUserError> {
@@ -103,14 +103,14 @@ impl UserGateway for SqliteDatabaseGateway {
             JOIN github_logins gl ON u.id = gl.user_id
             WHERE u.email = ?"#,
         )
-            .bind(email)
-            .try_map(user_from_row)
-            .fetch_one(&self.sqlite_pool)
-            .await
-            .map_err(|err| match err {
-                Error::RowNotFound => GetUserError::NotFound,
-                _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
-            })
+        .bind(email)
+        .try_map(user_from_row)
+        .fetch_one(&self.sqlite_pool)
+        .await
+        .map_err(|err| match err {
+            Error::RowNotFound => GetUserError::NotFound,
+            _ => GetUserError::Unknown(error_and_log!("SQLX Error: {err}")),
+        })
     }
 }
 

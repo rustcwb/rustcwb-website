@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
-use fake::Fake;
 use fake::faker::internet::en::FreeEmail;
 use fake::faker::name::en::FirstName;
+use fake::Fake;
 use tokio::sync::Mutex;
 use ulid::Ulid;
 
@@ -71,7 +71,11 @@ pub async fn create_random_user(gateway: &SqliteDatabaseGateway) -> anyhow::Resu
         .await?)
 }
 
-pub async fn create_user_with_access_token_and_login_method(gateway: &SqliteDatabaseGateway, access_token: AccessToken, login_method: LoginMethod) -> anyhow::Result<User> {
+pub async fn create_user_with_access_token_and_login_method(
+    gateway: &SqliteDatabaseGateway,
+    access_token: AccessToken,
+    login_method: LoginMethod,
+) -> anyhow::Result<User> {
     Ok(gateway
         .store_user(User {
             id: Ulid::new(),
@@ -100,7 +104,7 @@ pub struct GithubGatewayMock {
 
 type UserInfoCallable = dyn Fn(&AccessToken) -> Result<(String, String), UserInfoGithubError>;
 type RefreshTokenCallable =
-dyn Fn(&AccessToken) -> Result<(AccessToken, AccessToken), RefreshTokenError>;
+    dyn Fn(&AccessToken) -> Result<(AccessToken, AccessToken), RefreshTokenError>;
 type ExchangeCodeCallable = dyn Fn(&str) -> Result<(AccessToken, AccessToken), ExchangeCodeError>;
 
 struct InternalGithubGatewayMock {
@@ -137,7 +141,7 @@ impl GithubGatewayMock {
     pub async fn push_refresh_token(
         self,
         callable: impl Fn(&AccessToken) -> Result<(AccessToken, AccessToken), RefreshTokenError>
-        + 'static,
+            + 'static,
     ) -> Self {
         self.internal
             .lock()

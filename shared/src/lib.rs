@@ -21,19 +21,17 @@ pub mod test {
     }
 
     pub fn now() -> DateTime<Utc> {
-        NOW.with(|timestamp| {
-            match timestamp.get() {
-                Some(now) => return now,
-                None => {
-                    let now = Utc::now();
-                    timestamp.set(Some(now.clone()));
-                    now
-                }
+        NOW.with(|timestamp| match timestamp.get() {
+            Some(now) => now,
+            None => {
+                let now = Utc::now();
+                timestamp.set(Some(now));
+                now
             }
         })
     }
 
     pub fn set_now(now: &DateTime<Utc>) {
-        NOW.set(Some(now.clone()));
+        NOW.set(Some(*now));
     }
 }

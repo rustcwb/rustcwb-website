@@ -5,17 +5,18 @@
     <p class="text-md py-2">Title: {{ future_meet_up.title }}</p>
     <p class="text-md py-2">Speaker: {{ future_meet_up.speaker }}</p>
     <p class="text-md py-2">Description: {{ future_meet_up.Description }}</p>
+    <p class="text-md py-2">Attendees: {{ n_attendees }}</p>
     <form
-        class="flex flex-col items-left justify-items-start space-y-3 mt-4"
-        hx-post="/admin/finish"
-        hx-target="#futureMeetup"
+            class="flex flex-col items-left justify-items-start space-y-3 mt-4"
+            hx-post="/admin/finish"
+            hx-target="#futureMeetup"
     >
         <label for="link">Link:</label>
-        <input type="text" name="link" />
+        <input name="link" type="text"/>
         <input
-            class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
-            type="submit"
-            value="Complete and Move to Past Meetups"
+                class="p-4 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150"
+                type="submit"
+                value="Complete and Move to Past Meetups"
         />
     </form>
 </article>

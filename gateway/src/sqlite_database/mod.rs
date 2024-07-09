@@ -2,6 +2,7 @@ use anyhow::Result;
 use sqlx::SqlitePool;
 
 mod meet_up_gateway;
+mod meet_up_goers_gateway;
 mod paper_gateway;
 mod user_gateway;
 mod vote_gateway;

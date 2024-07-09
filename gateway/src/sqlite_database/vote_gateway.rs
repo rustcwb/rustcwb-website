@@ -1,4 +1,4 @@
-use sqlx::{Error, Row, sqlite::SqliteRow};
+use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
 
 use domain::{Vote, VoteError, VoteGateway};

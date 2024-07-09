@@ -1,0 +1,22 @@
+{% if user %}
+{% if registered_user%}
+<a
+        aria-disabled="true"
+        class="mt-2 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+>Inscrito</a
+>
+{% else %}
+<a
+        class="mt-2 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+        hx-post="/register"
+        hx-swap="outerHTML"
+>Inscrever-se</a
+>
+{% endif %}
+{% else %}
+<a
+        class="mt-2 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
+        href="https://github.com/login/oauth/authorize?client_id={{ client_id }}"
+>Login para Inscrever-se</a
+>
+{% endif %}
