@@ -19,7 +19,7 @@ jobs:
           TOOLCHAIN_VERSION: stable
           RUSTTARGET: x86_64-unknown-linux-musl
           ARCHIVE_TYPES: tar.gz
-          EXTRA_FILES: ./web-server/public/
+          EXTRA_FILES: "./web-server/public/"
 #      - uses: actions/checkout@master
 #      - name: Compress public dir
 #        run: tar -czf public.tar.gz web-server/public
@@ -29,7 +29,7 @@ jobs:
           host: ${{ secrets.DIGITALOCEAN_HOST }}
           username: ${{ secrets.DIGITALOCEAN_USERNAME }}
           key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
-          source: "public.tar.gz,${{ steps.compile.outputs.BUILT_ARCHIVE }}"
+          source: "${{ steps.compile.outputs.BUILT_ARCHIVE }}"
           target: /app
       - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
