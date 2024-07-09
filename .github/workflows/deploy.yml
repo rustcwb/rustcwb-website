@@ -20,9 +20,9 @@ jobs:
           args: "--locked --release"
           strip: true
       - name: Compress public dir
-        run: tar -czf public.tar.gz web-server/public
+        run: tar -czf public.tar.gz -C web-server public/
       - name: Compress binary
-        run: tar -czf binary.tar.gz ./target/x86_64-unknown-linux-gnu/release/web-server
+        run: tar -czf binary.tar.gz -C ./target/x86_64-unknown-linux-gnu/release web-server
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -39,6 +39,8 @@ jobs:
           key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
           script: |
             cd /app
-            tar -xzf *.tar.gz
+            tar -xzf public.tar.gz
+            tar -xzf binary.tar.gz
+            rm *.tar.gz
             killall web-server
             ./web-server &
