@@ -19,10 +19,10 @@ jobs:
           TOOLCHAIN_VERSION: stable
           RUSTTARGET: x86_64-unknown-linux-musl
           ARCHIVE_TYPES: tar.gz
-      - uses: actions/checkout@master
-      - name: Compress public dir
-        run: tar -czf public.tar.gz web-server/public
-      - uses: actions/checkout@v4
+          EXTRA_FILES: ./web-server/public/
+#      - uses: actions/checkout@master
+#      - name: Compress public dir
+#        run: tar -czf public.tar.gz web-server/public
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -31,7 +31,6 @@ jobs:
           key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
           source: "public.tar.gz,${{ steps.compile.outputs.BUILT_ARCHIVE }}"
           target: /app
-      - uses: actions/checkout@master
       - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
         with:
