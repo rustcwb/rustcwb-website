@@ -43,4 +43,4 @@ jobs:
           username: ${{ secrets.DIGITALOCEAN_USERNAME }}
           key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
           script: |
-            ./app/deploy/deploy.sh
+            /app/deploy/deploy.sh
