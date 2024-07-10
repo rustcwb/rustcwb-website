@@ -19,6 +19,11 @@ jobs:
           target: x86_64-unknown-linux-gnu
           args: "--locked --release"
           strip: true
+      - name: minifycss
+        uses: nizarmah/auto-minify@v3
+        with:
+          directory: ./web-server/public/assets/css
+          overwrite: true
       - name: Compress public dir
         run: tar -czf public.tar.gz -C web-server public/
       - name: Compress binary
