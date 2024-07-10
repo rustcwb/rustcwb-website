@@ -17,7 +17,7 @@ jobs:
         with:
           command: build
           target: x86_64-unknown-linux-gnu
-          args: "--locked --release"
+          args: "--locked --release --bin web-server"
           strip: true
       - name: minifycss
         uses: nizarmah/auto-minify@v3
@@ -34,7 +34,7 @@ jobs:
           host: ${{ secrets.DIGITALOCEAN_HOST }}
           username: ${{ secrets.DIGITALOCEAN_USERNAME }}
           key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
-          source: "binary.tar.gz,public.tar.gz"
+          source: "binary.tar.gz,public.tar.gz,deploy/deploy.sh"
           target: /app
       - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
@@ -43,10 +43,4 @@ jobs:
           username: ${{ secrets.DIGITALOCEAN_USERNAME }}
           key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
           script: |
-            cd /app
-            tar -xzf public.tar.gz
-            tar -xzf binary.tar.gz
-            rm *.tar.gz
-            killall web-server
-            "nohup ./web-server > nohup.out 2>&1 &"
-            exit 0
+            ./deploy.sh
