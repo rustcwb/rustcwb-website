@@ -48,4 +48,4 @@ jobs:
             tar -xzf binary.tar.gz
             rm *.tar.gz
             killall web-server
-            ./web-server &
+            nohup ./web-server &
