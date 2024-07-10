@@ -30,7 +30,8 @@ async fn main() -> Result<()> {
     .layer(CompressionLayer::new())
     .layer(TraceLayer::new_for_http());
 
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", var("WEB_SERVER_PORT")?)).await?;
+    let listener =
+        tokio::net::TcpListener::bind(format!("0.0.0.0:{}", var("WEB_SERVER_PORT")?)).await?;
     tracing::info!("Listening to new connections");
     axum::serve(listener, app).await?;
     Ok(())
