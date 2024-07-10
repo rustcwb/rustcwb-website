@@ -67,8 +67,15 @@
 <main class="flex flex-col mb-auto" id="main-content">
     {% block content %}{% endblock %}
 </main>
-<footer class="bg-black text-white">
-    <p class="text-center text-lg p-4">RustCWB - 2024</p>
+<footer class="bg-black text-white flex justify-center">
+    <div class="flex flex-col-reverse md:flex-row space-x-5">
+        <p class="text-center text-lg p-4">RustCWB - 2024</p>
+        <p class="font-bold text-lg py-4 hidden md:inline">|</p>
+        <div class="flex flex-col md:flex-row md:space-x-2 text-center text-lg p-4">
+            <p>Encontrou um erro?</p>
+            <p>Abra um PR <a href="https://github.com/rustcwb/rustcwb-website" class="underline font-bold">aqui</a></p>
+        </div>
+    </div>
 </footer>
 </body>
 </html>

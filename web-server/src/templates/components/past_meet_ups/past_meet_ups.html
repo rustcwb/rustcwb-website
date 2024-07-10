@@ -4,15 +4,15 @@
     <div
         class="flex flex-row justify-between bg-rustDark p-4 rounded-t-md text-md"
     >
-        <div class="font-bold">Meet Up Title</div>
-        <div>Date</div>
+        <div class="font-bold">Título</div>
+        <div>Data</div>
     </div>
     {% if past_meetups %} {% for meetup in past_meetups %} {% if loop.index0 !=
     0 %}
     <hr class="w-full bg-rustDark border-0 h-px" />
     {% endif %} {% include 'components/past_meet_ups/past_meet_up_metadata' %}
     {% endfor %} {% else %}
-    <div class="flex flex-col p-4">No past meetups yet</div>
+    <div class="flex flex-col p-4">Nenhum MeetUp antigo</div>
     {% endif %}
     <div
         class="flex flex-row justify-between bg-rustDark p-4 rounded-b-md text-md"
