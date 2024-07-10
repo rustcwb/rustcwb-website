@@ -48,4 +48,5 @@ jobs:
             tar -xzf binary.tar.gz
             rm *.tar.gz
             killall web-server
-            nohup ./web-server &
+            nohup ./web-server > log.txt >2&1 &
+            exit 0
