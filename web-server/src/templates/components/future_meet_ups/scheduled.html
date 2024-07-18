@@ -8,12 +8,13 @@
 <p>Speaker: {{ future_meet_up.speaker }}</p>
 {% include 'components/future_meet_ups/location' %}
 <p class="py-2">{{ future_meet_up.description }}</p>
+<br/>
 <p class="text-md py-2">
     Pedimos para que se possível se inscrever no botão a baixo. Isso nos ajuda a ter uma ideia de quantas pessoas vão
     participar.
 </p>
 <div class="flex justify-center">
-    {% if future_meet_up.location.Online.calendar_link %}
+    {% if future_meet_up.location.Online %}
     <a
             class="mt-2 px-4 py-2 rounded-md bg-rustLight text-white hover:bg-rustDark transition ease-in-out duration-150 cursor-pointer"
             href="{{ future_meet_up.location.Online.calendar_link }}"
