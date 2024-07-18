@@ -31,7 +31,7 @@ jobs:
         if: failure()
         with:
           name: npm-logs
-          path: ~/.npm/_logs
+          path: /github/home/.npm/_logs/
       - name: Compress public dir
         run: tar -czf public.tar.gz -C web-server public/
       - name: Compress binary
