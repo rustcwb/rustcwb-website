@@ -2,10 +2,7 @@
     Data:
     <time datetime="{{ future_meet_up.date }}">{{ future_meet_up.date }}</time>
 </div>
-<div>
-    Local:
-    <address class="inline">{{ future_meet_up.location }}</address>
-</div>
+{% include 'components/future_meet_ups/location' %}
 
 <p>
     Estamos com o Call For Papers aberto para nosso próximo meet-up. sinta-se a

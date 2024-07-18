@@ -6,8 +6,8 @@ use tokio::sync::Mutex;
 use ulid::Ulid;
 
 use domain::{
-    AccessToken, ExchangeCodeError, GithubGateway, LoginMethod, MeetUp, MeetUpGateway, MeetUpState,
-    Paper, PaperGateway, RefreshTokenError, User, UserGateway, UserInfoGithubError,
+    AccessToken, ExchangeCodeError, GithubGateway, Location, LoginMethod, MeetUp, MeetUpGateway,
+    MeetUpState, Paper, PaperGateway, RefreshTokenError, User, UserGateway, UserInfoGithubError,
 };
 use gateway::SqliteDatabaseGateway;
 
@@ -25,7 +25,7 @@ macro_rules! assert_meet_up_state {
 
 pub async fn create_meet_up(
     gateway: &SqliteDatabaseGateway,
-    location: String,
+    location: Location,
     date: NaiveDate,
     state: MeetUpState,
 ) -> anyhow::Result<MeetUp> {

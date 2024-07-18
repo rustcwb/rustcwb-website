@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
-use domain::{MeetUp, MeetUpState, User};
+use domain::{Location, MeetUp, MeetUpState, User};
 
 pub mod admin;
 pub mod call_for_papers;
@@ -92,7 +92,7 @@ struct MeetUpPresenter {
     speaker: String,
     date: NaiveDate,
     link: String,
-    location: String,
+    location: Location,
 }
 
 impl From<MeetUp> for MeetUpPresenter {

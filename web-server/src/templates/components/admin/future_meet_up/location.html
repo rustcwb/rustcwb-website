@@ -1,0 +1,11 @@
+{% if future_meet_up.location.OnSite %}
+<p class="text-md py-2">
+    Local: <address class="inline">{{ future_meet_up.location.OnSite }}</address>
+</p>
+{% else %}
+<p class="text-md py-2">
+    Online: <a href="{{ future_meet_up.location.Online.video_conference_link }}" target="_blank">{{ future_meet_up.location.Online.video_conference_link }}</a>
+</p>
+<p class="text-md py-2">Calendar Link: <a href="{{ future_meet_up.location.Online.calendar_link }}" target="_blank">{{ future_meet_up.location.Online.calendar_link }}</a>
+</p>
+{% endif %}

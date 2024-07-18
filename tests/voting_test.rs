@@ -1,6 +1,8 @@
 use assertables::{assert_contains, assert_contains_as_result};
 
-use domain::{move_future_meet_up_to_voting, show_voting, store_votes, submit_paper, MeetUpState};
+use domain::{
+    move_future_meet_up_to_voting, show_voting, store_votes, submit_paper, Location, MeetUpState,
+};
 use shared::utc_now;
 use tests::{build_gateway, build_paper_with_user, create_meet_up, create_random_user};
 
@@ -21,7 +23,7 @@ async fn show_voting_with_invalid_meet_up_state() -> anyhow::Result<()> {
     let user = create_random_user(&gateway).await?;
     let _ = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -39,7 +41,7 @@ async fn show_voting_without_papers() -> anyhow::Result<()> {
     let user = create_random_user(&gateway).await?;
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Voting,
     )
@@ -58,7 +60,7 @@ async fn show_voting_with_papers() -> anyhow::Result<()> {
     let paper_2 = build_paper_with_user(user.id.clone());
     let mut meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -82,7 +84,7 @@ async fn store_and_show_voting() -> anyhow::Result<()> {
     let paper_2 = build_paper_with_user(user.id.clone());
     let mut meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )

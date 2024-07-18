@@ -1,0 +1,10 @@
+{% if future_meet_up.location.OnSite %}
+<div>
+    Local:
+    <address class="inline">{{ future_meet_up.location.OnSite }}</address>
+</div>
+{% else %}
+<div>
+    Online: <a href="{{ future_meet_up.location.Online.video_conference_link }}" target="_blank" class="underline font-bold">Link da reunião</a>
+</div>
+{% endif %}

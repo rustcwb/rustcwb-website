@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
+use anyhow::anyhow;
 use axum::{extract::State, response::Html, Form};
 use chrono::NaiveDate;
 use minijinja::context;
 use serde::Deserialize;
+use std::sync::Arc;
 use url::Url;
 
 use domain::{
@@ -25,7 +25,15 @@ pub async fn create_meet_up(
     let tmpl = state
         .get_minijinja_env()
         .get_template("components/admin/future_meet_up/future_meet_up")?;
-    let meet_up = create_new_meet_up(&state.database_gateway, params.location, params.date).await?;
+    let location = match params.location_type.as_str() {
+        "OnSite" => domain::Location::OnSite(params.location_address),
+        "Online" => domain::Location::Online {
+            video_conference_link: params.location_video_conference_link.parse()?,
+            calendar_link: params.location_calendar_link.parse()?,
+        },
+        other => return Err(anyhow!("Invalid location type {other}").into()),
+    };
+    let meet_up = create_new_meet_up(&state.database_gateway, location, params.date).await?;
 
     let context = context! {
         future_meet_up => MeetUpPresenter::from(meet_up),
@@ -36,7 +44,10 @@ pub async fn create_meet_up(
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateFutureMeetUpParam {
-    location: String,
+    location_type: String,
+    location_address: String,
+    location_video_conference_link: String,
+    location_calendar_link: String,
     date: NaiveDate,
 }
 

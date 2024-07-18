@@ -19,8 +19,17 @@ pub struct MeetUpMetadata {
 pub struct MeetUp {
     pub id: Ulid,
     pub state: MeetUpState,
-    pub location: String,
+    pub location: Location,
     pub date: NaiveDate,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Location {
+    Online {
+        video_conference_link: Url,
+        calendar_link: Url,
+    },
+    OnSite(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,7 +52,7 @@ impl std::fmt::Display for MeetUpState {
 }
 
 impl MeetUp {
-    pub fn new(id: Ulid, state: MeetUpState, location: String, date: NaiveDate) -> Self {
+    pub fn new(id: Ulid, state: MeetUpState, location: Location, date: NaiveDate) -> Self {
         Self {
             id,
             state,

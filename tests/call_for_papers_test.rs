@@ -1,7 +1,7 @@
 use assertables::{assert_contains, assert_contains_as_result};
 use ulid::Ulid;
 
-use domain::{get_paper, show_call_for_papers, submit_paper, MeetUpState};
+use domain::{get_paper, show_call_for_papers, submit_paper, Location, MeetUpState};
 use shared::utc_now;
 use tests::{build_gateway, build_paper_with_user, create_meet_up, create_random_user};
 
@@ -22,7 +22,7 @@ async fn show_call_for_papers_with_wrong_state() -> anyhow::Result<()> {
     let user = create_random_user(&gateway).await?;
     let _ = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Voting,
     )
@@ -40,7 +40,7 @@ async fn show_call_for_papers_without_papers() -> anyhow::Result<()> {
     let user = create_random_user(&gateway).await?;
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -60,7 +60,7 @@ async fn show_call_for_papers_with_papers_but_less_than_limit() -> anyhow::Resul
     let paper = build_paper_with_user(user.id.clone());
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -82,7 +82,7 @@ async fn show_call_for_papers_with_papers_at_limit() -> anyhow::Result<()> {
     let paper_2 = build_paper_with_user(user.id.clone());
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -108,7 +108,7 @@ async fn show_call_for_papers_should_only_show_papers_from_correct_user() -> any
     let paper_2 = build_paper_with_user(user_2.id.clone());
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -147,7 +147,7 @@ async fn submit_paper_with_invalid_state() -> anyhow::Result<()> {
     let paper = build_paper_with_user(user.id.clone());
     let _ = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Voting,
     )
@@ -168,7 +168,7 @@ async fn submit_paper_over_limit_per_user() -> anyhow::Result<()> {
     let paper_3 = build_paper_with_user(user.id.clone());
     let _ = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -206,7 +206,7 @@ async fn get_paper_should_return_expected_paper() -> anyhow::Result<()> {
     let paper = build_paper_with_user(user.id.clone());
     let _ = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )

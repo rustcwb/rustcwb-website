@@ -1,4 +1,4 @@
-use domain::{register_event_goer, MeetUpGoersGateway, MeetUpState};
+use domain::{register_event_goer, Location, MeetUpGoersGateway, MeetUpState};
 use shared::utc_now;
 use tests::{build_gateway, build_paper_with_user, create_meet_up, create_random_user};
 
@@ -19,7 +19,7 @@ pub async fn register_meet_up_goers_invalid_state() -> anyhow::Result<()> {
     let user = create_random_user(&gateway).await?;
     let _ = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -38,7 +38,7 @@ pub async fn register_meet_up_goers() -> anyhow::Result<()> {
     let paper = build_paper_with_user(user.id.clone());
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Scheduled(paper),
     )

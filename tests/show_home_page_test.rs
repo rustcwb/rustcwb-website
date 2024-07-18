@@ -1,4 +1,4 @@
-use domain::{register_event_goer, show_home_page, MeetUpMetadata, MeetUpState};
+use domain::{register_event_goer, show_home_page, Location, MeetUpMetadata, MeetUpState};
 use shared::utc_now;
 use tests::{build_gateway, build_paper_with_user, create_meet_up, create_random_user};
 
@@ -18,7 +18,7 @@ async fn show_home_page_with_future_meet_up() -> anyhow::Result<()> {
     let gateway = build_gateway().await?;
     let meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -38,7 +38,7 @@ async fn show_home_page_with_future_and_past_meet_ups() -> anyhow::Result<()> {
     let paper = build_paper_with_user(user.id.clone());
     let past_meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Done {
             paper: paper.clone(),
@@ -48,7 +48,7 @@ async fn show_home_page_with_future_and_past_meet_ups() -> anyhow::Result<()> {
     .await?;
     let future_meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::CallForPapers,
     )
@@ -75,7 +75,7 @@ async fn show_home_page_with_user_registered_to_meet_up_but_not_logged() -> anyh
     let paper = build_paper_with_user(user.id.clone());
     let future_meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Scheduled(paper),
     )
@@ -94,7 +94,7 @@ async fn show_home_page_with_user_registered_to_meet_up() -> anyhow::Result<()> 
     let paper = build_paper_with_user(user.id.clone());
     let future_meet_up = create_meet_up(
         &gateway,
-        "location".into(),
+        Location::OnSite("location".into()),
         utc_now().naive_utc().date(),
         MeetUpState::Scheduled(paper),
     )

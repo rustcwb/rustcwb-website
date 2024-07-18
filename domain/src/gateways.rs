@@ -5,7 +5,7 @@ use thiserror::Error;
 use ulid::Ulid;
 use url::Url;
 
-use crate::{AccessToken, MeetUp, MeetUpMetadata, Paper, User, Vote};
+use crate::{AccessToken, Location, MeetUp, MeetUpMetadata, Paper, User, Vote};
 
 #[derive(Debug, Error)]
 pub enum ListPastMeetUpsError {
@@ -32,7 +32,7 @@ pub trait MeetUpGateway {
     async fn new_meet_up(
         &self,
         id: Ulid,
-        location: String,
+        location: Location,
         date: NaiveDate,
     ) -> Result<MeetUp, NewMeetUpError>;
     async fn update_meet_up_to_voting(&self, id: &Ulid) -> Result<MeetUp, UpdateMeetUpError>;

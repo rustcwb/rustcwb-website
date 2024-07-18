@@ -4,7 +4,7 @@ use ulid::Ulid;
 use url::Url;
 
 use domain::{
-    GetFutureMeetUpError, GetMeetUpError, ListPastMeetUpsError, MeetUp, MeetUpGateway,
+    GetFutureMeetUpError, GetMeetUpError, ListPastMeetUpsError, Location, MeetUp, MeetUpGateway,
     MeetUpMetadata, MeetUpState, NewMeetUpError, Paper, UpdateMeetUpError,
 };
 use shared::utc_now;
@@ -33,13 +33,16 @@ impl MeetUpGateway for SqliteDatabaseGateway {
     async fn new_meet_up(
         &self,
         id: Ulid,
-        location: String,
+        location: Location,
         date: NaiveDate,
     ) -> Result<MeetUp, NewMeetUpError> {
         sqlx::query("INSERT INTO meet_ups (id, state, location, date) VALUES (?, ?, ?, ?)")
             .bind(id.to_bytes().as_slice())
             .bind(0)
-            .bind(&location)
+            .bind(
+                serde_json::to_string(&location)
+                    .map_err(|err| NewMeetUpError::Unknown(error_and_log!("Serde Error: {err}")))?,
+            )
             .bind(date)
             .execute(&self.sqlite_pool)
             .await
@@ -177,7 +180,8 @@ fn meet_up_from_sqlite_row(row: SqliteRow) -> Result<MeetUp, Error> {
                 .map_err(|err| Error::Decode(Box::new(err)))?,
         ),
         state,
-        row.get("location"),
+        serde_json::from_str(row.get::<'_, &str, _>("location"))
+            .map_err(|err| Error::Decode(Box::new(err)))?,
         row.get("date"),
     ))
 }

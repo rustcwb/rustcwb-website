@@ -5,13 +5,13 @@ use ulid::Ulid;
 use url::Url;
 
 use crate::{
-    GetFutureMeetUpError, GetMeetUpError, MeetUp, MeetUpGateway, MeetUpMetadata, MeetUpState,
-    NewMeetUpError, VoteDecider, VoteGateway,
+    GetFutureMeetUpError, GetMeetUpError, Location, MeetUp, MeetUpGateway, MeetUpMetadata,
+    MeetUpState, NewMeetUpError, VoteDecider, VoteGateway,
 };
 
 pub async fn create_new_meet_up(
     gateway: &impl MeetUpGateway,
-    location: String,
+    location: Location,
     date: NaiveDate,
 ) -> Result<MeetUp, NewMeetUpError> {
     gateway.new_meet_up(Ulid::new(), location, date).await

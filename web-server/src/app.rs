@@ -110,6 +110,10 @@ impl AppState {
         );
         add_template!(
             env,
+            "templates/components/admin/future_meet_up/location.html"
+        );
+        add_template!(
+            env,
             "templates/components/future_meet_ups/future_meet_up.html"
         );
         add_template!(
@@ -118,6 +122,7 @@ impl AppState {
         );
         add_template!(env, "templates/components/future_meet_ups/voting.html");
         add_template!(env, "templates/components/future_meet_ups/scheduled.html");
+        add_template!(env, "templates/components/future_meet_ups/location.html");
         add_template!(
             env,
             "templates/components/future_meet_ups/register_button.html"

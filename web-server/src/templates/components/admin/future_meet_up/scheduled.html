@@ -1,6 +1,6 @@
 <article class="flex-col mt-3" id="futureMeetup">
     <p class="text-md py-2">Scheduled</p>
-    <p class="text-md py-2">Location: {{ future_meet_up.location }}</p>
+    {% include 'components/admin/future_meet_up/location' %}
     <p class="text-md py-2">Date: {{ future_meet_up.date }}</p>
     <p class="text-md py-2">Title: {{ future_meet_up.title }}</p>
     <p class="text-md py-2">Speaker: {{ future_meet_up.speaker }}</p>

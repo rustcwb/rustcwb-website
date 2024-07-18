@@ -1,3 +1,4 @@
+<script src="//unpkg.com/alpinejs" defer></script>
 <article class="flex-col mt-3" id="futureMeetup">
     <p class="text-md py-2">No future meetup yet.</p>
     <form
@@ -5,8 +6,23 @@
         hx-post="/admin/createMeetUp"
         hx-target="#futureMeetup"
     >
-        <label for="location">Location:</label>
-        <input id="location" name="location" type="text" />
+        <div x-data="{ location_type: 'Online' }" class="flex flex-col items-left justify-items-start space-y-3">
+            <label for="location_type">Location type:</label>
+            <select name="location_type" id="location_type" x-model="location_type">
+                <option value="Online" selected>Online</option>
+                <option value="OnSite">OnSite</option>
+            </select>
+            <div x-show="location_type == 'OnSite'" class="flex flex-col items-left justify-items-start space-y-3">
+                <label for="location_address">Location Address:</label>
+                <input id="location_address" name="location_address" type="text" />
+            </div>
+            <div x-show="location_type == 'Online'" class="flex flex-col items-left justify-items-start space-y-3">
+                <label for="location_video_conference_link">Location Conference Link:</label>
+                <input id="location_video_conference_link" name="location_video_conference_link" type="text" />
+                <label for="location_calendar_link">Location Calendar Link:</label>
+                <input id="location_calendar_link" name="location_calendar_link" type="text" />
+            </div>
+        </div>
         <label for="date">Date:</label>
         <input id="date" name="date" type="date" />
         <input
