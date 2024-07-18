@@ -26,6 +26,12 @@ jobs:
           css_engine: lightning
           directory: ./web-server/public/assets/css
           overwrite: true
+      - name: Archive npm failure logs
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: npm-logs
+          path: ~/.npm/_logs
       - name: Compress public dir
         run: tar -czf public.tar.gz -C web-server public/
       - name: Compress binary
