@@ -1,6 +1,6 @@
 #![allow(async_fn_in_trait)]
 
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use thiserror::Error;
 use ulid::Ulid;
 use url::Url;
@@ -33,7 +33,7 @@ pub trait MeetUpGateway {
         &self,
         id: Ulid,
         location: Location,
-        date: NaiveDate,
+        date: DateTime<Utc>,
     ) -> Result<MeetUp, NewMeetUpError>;
     async fn update_meet_up_to_voting(&self, id: &Ulid) -> Result<MeetUp, UpdateMeetUpError>;
     async fn update_meet_up_to_scheduled(

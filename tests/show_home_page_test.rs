@@ -19,7 +19,7 @@ async fn show_home_page_with_future_meet_up() -> anyhow::Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -39,7 +39,7 @@ async fn show_home_page_with_future_and_past_meet_ups() -> anyhow::Result<()> {
     let past_meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Done {
             paper: paper.clone(),
             link: "https://example.com".parse()?,
@@ -49,7 +49,7 @@ async fn show_home_page_with_future_and_past_meet_ups() -> anyhow::Result<()> {
     let future_meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -76,7 +76,7 @@ async fn show_home_page_with_user_registered_to_meet_up_but_not_logged() -> anyh
     let future_meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Scheduled(paper),
     )
     .await?;
@@ -95,7 +95,7 @@ async fn show_home_page_with_user_registered_to_meet_up() -> anyhow::Result<()> 
     let future_meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Scheduled(paper),
     )
     .await?;

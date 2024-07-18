@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use sqlx::{sqlite::SqliteRow, Error, Row};
 use ulid::Ulid;
 use url::Url;
@@ -34,9 +34,9 @@ impl MeetUpGateway for SqliteDatabaseGateway {
         &self,
         id: Ulid,
         location: Location,
-        date: NaiveDate,
+        date: DateTime<Utc>,
     ) -> Result<MeetUp, NewMeetUpError> {
-        sqlx::query("INSERT INTO meet_ups (id, state, location, date) VALUES (?, ?, ?, ?)")
+        sqlx::query("INSERT INTO meet_ups (id, state, location, datetime) VALUES (?, ?, ?, ?)")
             .bind(id.to_bytes().as_slice())
             .bind(0)
             .bind(
@@ -117,7 +117,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
 
     async fn list_past_meet_ups(&self) -> Result<Vec<MeetUpMetadata>, ListPastMeetUpsError> {
         Ok(
-            sqlx::query("SELECT mu.id, p.title, date FROM meet_ups mu JOIN papers p ON mu.paper_id = p.id AND mu.state = 3 ORDER BY date desc;")
+            sqlx::query("SELECT mu.id, p.title, datetime FROM meet_ups mu JOIN papers p ON mu.paper_id = p.id AND mu.state = 3 ORDER BY datetime desc;")
                 .try_map(|row: SqliteRow| {
                     Ok(MeetUpMetadata::new(
                         Ulid::from_bytes(
@@ -126,7 +126,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
                                 .map_err(|err| sqlx::Error::Decode(Box::new(err)))?,
                         ),
                         row.get("title"),
-                        row.get("date"),
+                        row.get("datetime"),
                     ))
                 })
                 .fetch_all(&self.sqlite_pool)
@@ -137,7 +137,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
 
     async fn get_meet_up(&self, id: &Ulid) -> Result<MeetUp, GetMeetUpError> {
         sqlx::query(
-            "SELECT mu.id, mu.paper_id, mu.state, p.user_id, p.title, p.description, p.speaker, p.email, mu.date, mu.link, mu.location FROM meet_ups mu LEFT JOIN papers p ON mu.paper_id = p.id WHERE mu.id = ?",
+            "SELECT mu.id, mu.paper_id, mu.state, p.user_id, p.title, p.description, p.speaker, p.email, mu.datetime, mu.link, mu.location FROM meet_ups mu LEFT JOIN papers p ON mu.paper_id = p.id WHERE mu.id = ?",
         )
             .bind(id.to_bytes().as_slice())
             .try_map(meet_up_from_sqlite_row)
@@ -150,7 +150,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
     }
 
     async fn get_meet_up_metadata(&self, id: Ulid) -> Result<MeetUpMetadata, GetMeetUpError> {
-        sqlx::query("SELECT mu.id, p.title, date FROM meet_ups mu JOIN papers p ON mu.paper_id = p.id AND state = 3 WHERE mu.id = ?")
+        sqlx::query("SELECT mu.id, p.title, datetime FROM meet_ups mu JOIN papers p ON mu.paper_id = p.id AND state = 3 WHERE mu.id = ?")
             .bind(id.to_bytes().as_slice())
             .try_map(|row: SqliteRow| {
                 Ok(MeetUpMetadata::new(
@@ -160,7 +160,7 @@ impl MeetUpGateway for SqliteDatabaseGateway {
                             .map_err(|err| Error::Decode(Box::new(err)))?,
                     ),
                     row.get("title"),
-                    row.get("date"),
+                    row.get("datetime"),
                 ))
             })
             .fetch_one(&self.sqlite_pool)
@@ -182,7 +182,7 @@ fn meet_up_from_sqlite_row(row: SqliteRow) -> Result<MeetUp, Error> {
         state,
         serde_json::from_str(row.get::<'_, &str, _>("location"))
             .map_err(|err| Error::Decode(Box::new(err)))?,
-        row.get("date"),
+        row.get("datetime"),
     ))
 }
 fn state_from_row(row: &SqliteRow) -> Result<MeetUpState, Error> {

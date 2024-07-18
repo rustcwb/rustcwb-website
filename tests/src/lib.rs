@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use fake::faker::internet::en::FreeEmail;
 use fake::faker::name::en::FirstName;
 use fake::Fake;
@@ -26,7 +26,7 @@ macro_rules! assert_meet_up_state {
 pub async fn create_meet_up(
     gateway: &SqliteDatabaseGateway,
     location: Location,
-    date: NaiveDate,
+    date: DateTime<Utc>,
     state: MeetUpState,
 ) -> anyhow::Result<MeetUp> {
     let meet_up = gateway.new_meet_up(Ulid::new(), location, date).await?;

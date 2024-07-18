@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use ulid::Ulid;
 
 use domain::{
@@ -7,6 +7,7 @@ use domain::{
     move_future_meet_up_to_done, move_future_meet_up_to_scheduled, move_future_meet_up_to_voting,
     GetPastMeetUpError, Location, MeetUpState, Paper, PaperGateway, Vote, VoteGateway,
 };
+use shared::utc_now;
 use tests::{
     assert_meet_up_state, build_gateway, build_paper_with_user, create_meet_up, create_random_user,
 };
@@ -25,7 +26,7 @@ async fn create_and_get_future_meet_up() -> Result<()> {
     let created_meet_up = create_new_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        "2024-12-12T12:35:43Z".parse()?,
     )
     .await?;
     let meet_up = get_future_meet_up(&gateway)
@@ -33,7 +34,10 @@ async fn create_and_get_future_meet_up() -> Result<()> {
         .expect("meetup not found");
     assert_eq!(created_meet_up, meet_up);
     assert_eq!(Location::OnSite("location".into()), meet_up.location);
-    assert_eq!("2024-12-12".parse::<NaiveDate>()?, meet_up.date);
+    assert_eq!(
+        "2024-12-12T12:35:43Z".parse::<DateTime<Utc>>()?,
+        meet_up.date
+    );
     assert_eq!(MeetUpState::CallForPapers, meet_up.state);
     Ok(())
 }
@@ -47,7 +51,7 @@ async fn create_and_get_meet_up() -> Result<()> {
             video_conference_link: "https://example.com".parse()?,
             calendar_link: "https://example.com".parse()?,
         },
-        "2024-12-12".parse()?,
+        "2024-12-12T17:30:00Z".parse()?,
     )
     .await?;
     let meet_up = get_meet_up(&gateway, created_meet_up.id).await?;
@@ -59,7 +63,10 @@ async fn create_and_get_meet_up() -> Result<()> {
         },
         meet_up.location
     );
-    assert_eq!("2024-12-12".parse::<NaiveDate>()?, meet_up.date);
+    assert_eq!(
+        "2024-12-12T17:30:00Z".parse::<DateTime<Utc>>()?,
+        meet_up.date
+    );
     assert_eq!(MeetUpState::CallForPapers, meet_up.state);
     Ok(())
 }
@@ -93,21 +100,21 @@ async fn get_meet_up_metadata_should_return_only_when_done() -> Result<()> {
     let meet_up_call_for_papers = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        "2024-12-12T00:00:00Z".parse()?,
         MeetUpState::CallForPapers,
     )
     .await?;
     let meet_up_voting = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-13".parse()?,
+        "2024-12-13T00:00:00Z".parse()?,
         MeetUpState::Voting,
     )
     .await?;
     let meet_up_scheduled = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-14".parse()?,
+        "2024-12-14T00:00:00Z".parse()?,
         MeetUpState::Scheduled(Paper {
             id: Ulid::new(),
             email: "test@email.com".into(),
@@ -121,7 +128,7 @@ async fn get_meet_up_metadata_should_return_only_when_done() -> Result<()> {
     let meet_up_done = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-15".parse()?,
+        "2024-12-15T00:00:00Z".parse()?,
         MeetUpState::Done {
             paper: Paper {
                 id: Ulid::new(),
@@ -154,7 +161,7 @@ async fn get_meet_up_metadata_should_return_only_when_done() -> Result<()> {
     );
     assert_eq!("Some title 2", meet_up_metadata_done.title);
     assert_eq!(
-        "2024-12-15".parse::<NaiveDate>()?,
+        "2024-12-15T00:00:00Z".parse::<DateTime<Utc>>()?,
         meet_up_metadata_done.date
     );
     Ok(())
@@ -176,7 +183,7 @@ async fn move_meet_up_to_voting_with_invalid_meet_up_state() -> Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::Voting,
     )
     .await?;
@@ -194,7 +201,7 @@ async fn move_meet_up_to_voting() -> Result<()> {
     let mut created_meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -220,7 +227,7 @@ async fn move_meet_up_to_scheduled_invalid_state() -> Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -238,7 +245,7 @@ async fn move_meet_up_to_scheduled_without_papers() -> Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::Voting,
     )
     .await?;
@@ -258,7 +265,7 @@ async fn move_meet_up_to_scheduled() -> Result<()> {
     let mut created_meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::Voting,
     )
     .await?;
@@ -295,7 +302,7 @@ async fn move_meet_up_to_done_invalid_state() -> Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -315,7 +322,7 @@ async fn move_meet_up_to_done() -> Result<()> {
     let mut meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        "2024-12-12".parse()?,
+        utc_now(),
         MeetUpState::Scheduled(paper.clone()),
     )
     .await?;

@@ -1,9 +1,9 @@
 use axum::response::{Html, IntoResponse};
-use chrono::NaiveDate;
+use chrono_tz::Brazil;
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
-use domain::{Location, MeetUp, MeetUpState, User};
+use domain::{Location, MeetUp, MeetUpMetadata, MeetUpState, User};
 
 pub mod admin;
 pub mod call_for_papers;
@@ -90,7 +90,7 @@ struct MeetUpPresenter {
     state: String,
     description: String,
     speaker: String,
-    date: NaiveDate,
+    date: String,
     link: String,
     location: Location,
 }
@@ -134,8 +134,35 @@ impl From<MeetUp> for MeetUpPresenter {
             description,
             speaker,
             link,
-            date: meetup.date,
+            date: format!(
+                "{} BRT",
+                meetup
+                    .date
+                    .with_timezone(&Brazil::West)
+                    .format("%Y-%m-%d %H:%M:%S")
+            ),
             location: meetup.location,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MeetUpMetadataPresenter {
+    id: Ulid,
+    title: String,
+    date: String,
+}
+
+impl From<MeetUpMetadata> for MeetUpMetadataPresenter {
+    fn from(metadata: MeetUpMetadata) -> Self {
+        Self {
+            id: metadata.id,
+            title: metadata.title,
+            date: metadata
+                .date
+                .with_timezone(&Brazil::West)
+                .format("%Y-%m-%d")
+                .to_string(),
         }
     }
 }

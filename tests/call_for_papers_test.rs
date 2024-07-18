@@ -23,7 +23,7 @@ async fn show_call_for_papers_with_wrong_state() -> anyhow::Result<()> {
     let _ = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Voting,
     )
     .await?;
@@ -41,7 +41,7 @@ async fn show_call_for_papers_without_papers() -> anyhow::Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -61,7 +61,7 @@ async fn show_call_for_papers_with_papers_but_less_than_limit() -> anyhow::Resul
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -83,7 +83,7 @@ async fn show_call_for_papers_with_papers_at_limit() -> anyhow::Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -109,7 +109,7 @@ async fn show_call_for_papers_should_only_show_papers_from_correct_user() -> any
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -148,7 +148,7 @@ async fn submit_paper_with_invalid_state() -> anyhow::Result<()> {
     let _ = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Voting,
     )
     .await?;
@@ -169,7 +169,7 @@ async fn submit_paper_over_limit_per_user() -> anyhow::Result<()> {
     let _ = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -207,7 +207,7 @@ async fn get_paper_should_return_expected_paper() -> anyhow::Result<()> {
     let _ = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;

@@ -12,7 +12,7 @@ use crate::{
     extractors::MaybeUser,
 };
 
-use super::HtmlError;
+use super::{HtmlError, MeetUpMetadataPresenter};
 
 pub async fn index(
     maybe_user: MaybeUser,
@@ -32,7 +32,7 @@ pub async fn index(
         registered_user => is_registered_user,
         client_id => state.github_client_id.clone(),
         future_meet_up => future_meet_up.map(MeetUpPresenter::from),
-        past_meetups => past_meet_ups,
+        past_meetups => past_meet_ups.into_iter().map(MeetUpMetadataPresenter::from).collect::<Vec<MeetUpMetadataPresenter>>(),
     };
     match is_hx_request {
         true => Ok(Html(tmpl.eval_to_state(context)?.render_block("content")?)),

@@ -1,8 +1,8 @@
 use anyhow::anyhow;
 use axum::{extract::State, response::Html, Form};
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use minijinja::context;
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use std::sync::Arc;
 use url::Url;
 
@@ -48,7 +48,23 @@ pub struct CreateFutureMeetUpParam {
     location_address: String,
     location_video_conference_link: String,
     location_calendar_link: String,
-    date: NaiveDate,
+    #[serde(deserialize_with = "from_datetime_local_form")]
+    date: DateTime<Utc>,
+}
+
+fn from_datetime_local_form<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M")
+        .map_err(serde::de::Error::custom)
+        .and_then(|dt| {
+            dt.and_local_timezone(chrono_tz::Brazil::West)
+                .single()
+                .map(|dt| dt.to_utc())
+                .ok_or(serde::de::Error::custom("Invalid date"))
+        })
 }
 
 pub async fn go_for_voting(

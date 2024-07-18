@@ -19,7 +19,7 @@ async fn show_admin_page_with_future_meet_up_and_no_papers() -> anyhow::Result<(
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -39,7 +39,7 @@ async fn show_admin_page_with_future_meet_up_and_papers() -> anyhow::Result<()> 
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -61,7 +61,7 @@ async fn show_admin_page_with_attendees() -> anyhow::Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Scheduled(paper),
     )
     .await?;

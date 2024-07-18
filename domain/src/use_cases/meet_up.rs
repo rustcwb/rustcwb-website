@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use thiserror::Error;
 use ulid::Ulid;
 use url::Url;
@@ -12,7 +12,7 @@ use crate::{
 pub async fn create_new_meet_up(
     gateway: &impl MeetUpGateway,
     location: Location,
-    date: NaiveDate,
+    date: DateTime<Utc>,
 ) -> Result<MeetUp, NewMeetUpError> {
     gateway.new_meet_up(Ulid::new(), location, date).await
 }

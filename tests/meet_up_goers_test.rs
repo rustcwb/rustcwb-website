@@ -20,7 +20,7 @@ pub async fn register_meet_up_goers_invalid_state() -> anyhow::Result<()> {
     let _ = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -39,7 +39,7 @@ pub async fn register_meet_up_goers() -> anyhow::Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Scheduled(paper),
     )
     .await?;

@@ -24,7 +24,7 @@ async fn show_voting_with_invalid_meet_up_state() -> anyhow::Result<()> {
     let _ = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -42,7 +42,7 @@ async fn show_voting_without_papers() -> anyhow::Result<()> {
     let meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::Voting,
     )
     .await?;
@@ -61,7 +61,7 @@ async fn show_voting_with_papers() -> anyhow::Result<()> {
     let mut meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;
@@ -85,7 +85,7 @@ async fn store_and_show_voting() -> anyhow::Result<()> {
     let mut meet_up = create_meet_up(
         &gateway,
         Location::OnSite("location".into()),
-        utc_now().naive_utc().date(),
+        utc_now(),
         MeetUpState::CallForPapers,
     )
     .await?;

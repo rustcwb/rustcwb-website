@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Debug};
 
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{DateTime, Utc};
 use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
@@ -8,11 +8,11 @@ use url::Url;
 
 use shared::utc_now;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MeetUpMetadata {
     pub id: Ulid,
     pub title: String,
-    pub date: NaiveDate,
+    pub date: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,7 +20,7 @@ pub struct MeetUp {
     pub id: Ulid,
     pub state: MeetUpState,
     pub location: Location,
-    pub date: NaiveDate,
+    pub date: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -52,7 +52,7 @@ impl std::fmt::Display for MeetUpState {
 }
 
 impl MeetUp {
-    pub fn new(id: Ulid, state: MeetUpState, location: Location, date: NaiveDate) -> Self {
+    pub fn new(id: Ulid, state: MeetUpState, location: Location, date: DateTime<Utc>) -> Self {
         Self {
             id,
             state,
@@ -63,7 +63,7 @@ impl MeetUp {
 }
 
 impl MeetUpMetadata {
-    pub fn new(id: Ulid, title: String, date: NaiveDate) -> Self {
+    pub fn new(id: Ulid, title: String, date: DateTime<Utc>) -> Self {
         Self { id, title, date }
     }
 }

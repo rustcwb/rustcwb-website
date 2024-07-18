@@ -11,7 +11,7 @@ use domain::{get_meet_up, get_meet_up_metadata};
 
 use crate::{app::AppState, controllers::MeetUpPresenter};
 
-use super::HtmlError;
+use super::{HtmlError, MeetUpMetadataPresenter};
 
 pub async fn meet_up(
     Path(id): Path<Ulid>,
@@ -36,7 +36,7 @@ pub async fn meet_up_metadata(
         .get_template("components/past_meet_ups/past_meet_up_metadata")?;
     let meetup = get_meet_up_metadata(&state.database_gateway, id).await?;
     let context = context! {
-        meetup => meetup,
+        meetup => MeetUpMetadataPresenter::from(meetup),
     };
     Ok(Html(tmpl.render(context)?))
 }
