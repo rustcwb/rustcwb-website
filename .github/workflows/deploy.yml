@@ -22,6 +22,8 @@ jobs:
       - name: minifycss
         uses: nizarmah/auto-minify@v3
         with:
+          js_engine: uglify-js
+          css_engine: lightning
           directory: ./web-server/public/assets/css
           overwrite: true
       - name: Compress public dir
