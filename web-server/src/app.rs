@@ -2,10 +2,12 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
+use axum::http::header::{REFERRER_POLICY, STRICT_TRANSPORT_SECURITY, X_CONTENT_TYPE_OPTIONS};
+use axum::http::HeaderValue;
 use axum::routing::{get, post};
 use axum::Router;
 use minijinja::Environment;
-use tower_http::services::ServeDir;
+use tower_http::{services::ServeDir, set_header::SetResponseHeaderLayer};
 
 use gateway::github::GithubRestGateway;
 use gateway::SqliteDatabaseGateway;
@@ -45,7 +47,19 @@ pub async fn build_app<T: Clone + Send + Sync + 'static>(
             client_id,
             admin_details,
         )?))
-        .fallback_service(ServeDir::new(assets_dir.as_ref())))
+        .fallback_service(ServeDir::new(assets_dir.as_ref()))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            STRICT_TRANSPORT_SECURITY,
+            HeaderValue::from_static("max-age=31536000; includeSubDomains; preload"),
+        ))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            REFERRER_POLICY,
+            HeaderValue::from_static("no-referrer"),
+        ))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            X_CONTENT_TYPE_OPTIONS,
+            HeaderValue::from_static("nosniff"),
+        )))
 }
 
 pub struct AppState {
