@@ -57,8 +57,14 @@ impl GithubGateway for GithubRestGateway {
             .await
             .map_err(|err| UserInfoGithubError::Unknown(error_and_log!("Reqwest error {err}")))?;
         let jd = &mut serde_json::Deserializer::from_str(&response);
-        let user_info: UserInfo = serde_path_to_error::deserialize(jd)
-            .map_err(|err| error_and_log!("Error deserializing message {}, {}", err, err.path()))?;
+        let user_info: UserInfo = serde_path_to_error::deserialize(jd).map_err(|err| {
+            error_and_log!(
+                "Error deserializing message {}, {}. Original response: {}",
+                err,
+                err.path(),
+                response
+            )
+        })?;
         Ok((user_info.login, user_info.email))
     }
 
