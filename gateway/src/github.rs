@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
 use serde::Deserialize;
 
@@ -27,7 +28,13 @@ impl GithubRestGateway {
 #[derive(Debug, Clone, Deserialize)]
 struct UserInfo {
     login: String,
+    email: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct Email {
     email: String,
+    primary: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -65,7 +72,37 @@ impl GithubGateway for GithubRestGateway {
                 response
             )
         })?;
-        Ok((user_info.login, user_info.email))
+        if let Some(email) = &user_info.email {
+            return Ok((user_info.login, email.clone()));
+        }
+
+        let emails_response = self
+            .client
+            .get("https://api.github.com/user/emails")
+            .header(ACCEPT, "application/json")
+            .header(CONTENT_TYPE, "application/json")
+            .header(USER_AGENT, "RustCWB/0.1.0")
+            .header(AUTHORIZATION, format!("Bearer {}", access_token.token()))
+            .send()
+            .await
+            .map_err(|err| UserInfoGithubError::Unknown(error_and_log!("Reqwest error {err}")))?
+            .text()
+            .await
+            .map_err(|err| UserInfoGithubError::Unknown(error_and_log!("Reqwest error {err}")))?;
+        let jd = &mut serde_json::Deserializer::from_str(&emails_response);
+        let emails: Vec<Email> = serde_path_to_error::deserialize(jd).map_err(|err| {
+            error_and_log!(
+                "Error deserializing message {}, {}. Original response: {}",
+                err,
+                err.path(),
+                emails_response
+            )
+        })?;
+        let email = emails.iter().find(|email| email.primary).or(emails.first());
+        Ok((
+            user_info.login,
+            email.ok_or(anyhow!("No email found"))?.email.clone(),
+        ))
     }
 
     async fn refresh_token(
