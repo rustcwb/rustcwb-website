@@ -43,7 +43,7 @@ impl GithubGateway for GithubRestGateway {
         &self,
         access_token: &AccessToken,
     ) -> Result<(String, String), UserInfoGithubError> {
-        let user_info = self
+        let response = self
             .client
             .get("https://api.github.com/user")
             .header(ACCEPT, "application/json")
@@ -53,11 +53,12 @@ impl GithubGateway for GithubRestGateway {
             .send()
             .await
             .map_err(|err| UserInfoGithubError::Unknown(error_and_log!("Reqwest error {err}")))?
-            .json::<UserInfo>()
+            .text()
             .await
-            .map_err(|err| {
-                UserInfoGithubError::Unknown(error_and_log!("Invalid json response {err}"))
-            })?;
+            .map_err(|err| UserInfoGithubError::Unknown(error_and_log!("Reqwest error {err}")))?;
+        let jd = &mut serde_json::Deserializer::from_str(&response);
+        let user_info: UserInfo = serde_path_to_error::deserialize(jd)
+            .map_err(|err| error_and_log!("Error deserializing message {}, {}", err, err.path()))?;
         Ok((user_info.login, user_info.email))
     }
 
