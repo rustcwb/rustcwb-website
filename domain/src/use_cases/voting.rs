@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use anyhow::anyhow;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use ulid::Ulid;
 
 use crate::{MeetUp, MeetUpGateway, MeetUpState, Paper, PaperGateway, Vote, VoteGateway};
@@ -25,6 +27,8 @@ pub async fn show_voting(
         .get_papers_from_meet_up(&future_meet_up.id)
         .await?;
     if votes.is_empty() {
+        let mut papers = papers;
+        papers.shuffle(&mut thread_rng());
         vote_gateway
             .store_votes(
                 papers
